@@ -1,0 +1,5 @@
+a = "a8b8a4b3a3b2a6b1a1b1a5b1a3b7a4b1a1b1a3b1a1b1a1b5a4b1a3b1a1b4a4b1a2b1a2b1a1b5a1b1a1b1a2b1a2b2a1b3a7b5a4b1a1b2a1b1a1b4a3b1a1b1a1b6a6b1a1b1a1b1a1b1a1b10a3b3a1"
+b = "a8b8a4b3a3b2a6b1a1b1a5b1a3b7a4b1a1b1a3b1a1b1a1b5a4b1a3b1a1b4a4b1a2b1a2b1a1b5a1b1a1b1a2b1a2b2a1b3a7b5a4b1a1b2a1b1a1b4a3b1a1b1a1b6a6b1a1b1a1b1a1b1a1b10a3b3a1"
+
+assert(a != b)
+
