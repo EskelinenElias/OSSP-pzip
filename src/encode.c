@@ -63,7 +63,7 @@ int handle_boundary(encoded_data_t* left_obj, encoded_data_t* right_obj) {
     if (left_char == right_char) {
                 
         // Get the last count from the left object
-        size_t left_count = left_obj->counts[left_obj->size - 1]; 
+        size_t* left_count = &left_obj->counts[left_obj->size - 1]; 
         
         // Get a pointer to the first count at the right object
         size_t* right_count = &right_obj->counts[0]; 
@@ -71,7 +71,8 @@ int handle_boundary(encoded_data_t* left_obj, encoded_data_t* right_obj) {
         //printf("L==R, L=%c, R=%c, %lu, %lu\n", left_char, right_char, left_count, *right_count);
 
         // Increase the count at the right object
-        *right_count += left_count; 
+        *right_count += *left_count; 
+        *left_count = 0; 
         
         // Decrease the size of the left object
         left_obj->size--; 

@@ -9,7 +9,7 @@ OBJDIR = obj
 BINDIR = .  #  Executable in the project root
 
 # Executable name
-TARGET = pzip
+TARGET = wzip
 
 # Source files
 SOURCES = $(wildcard $(SRCDIR)/*.c)

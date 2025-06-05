@@ -1,6 +1,8 @@
 {
     "files.associations": {
         ".fantomasignore": "ignore",
-        "data.h": "c"
+        "data.h": "c",
+        "queue": "c",
+        "stack": "c"
     }
 }

@@ -1,19 +1,23 @@
 #include "../include/encoded_data.h"
 
 // Function to create and initialize a new RLE data array
-encoded_data_t create_encoded_data(size_t initial_capacity) {
+encoded_data_t* create_encoded_data(size_t initial_capacity) {
     
-    // Initialize object
-    encoded_data_t encoded_data;
-    
+    // Allocate memory for the encoded data structure
+    encoded_data_t* encoded_data = (encoded_data_t*)malloc(sizeof(encoded_data_t));
+    if (encoded_data == NULL) {
+        fprintf(stderr, "create_encoded_data: Memory allocation failed!\n");
+        return NULL;
+    }    
+
     // Initialize fields
-    encoded_data.characters = (char*)malloc(initial_capacity * sizeof(char));
-    encoded_data.counts = (size_t*)malloc(initial_capacity * sizeof(size_t));
-    encoded_data.size = 0;
-    encoded_data.capacity = initial_capacity; 
+    encoded_data->characters = (char*)malloc(initial_capacity * sizeof(char));
+    encoded_data->counts = (size_t*)malloc(initial_capacity * sizeof(size_t));
+    encoded_data->size = 0;
+    encoded_data->capacity = initial_capacity; 
     
     // Check that memory allocation was successful
-    if (encoded_data.characters == NULL || encoded_data.counts == NULL) {
+    if (encoded_data->characters == NULL || encoded_data->counts == NULL) {
         fprintf(stderr, "create_encoded_data: Memory allocation failed!\n");
         exit(1); // Error
     } 
@@ -55,24 +59,30 @@ int realloc_encoded_data(encoded_data_t* encoded_data, size_t new_capacity) {
 
 // Function to free the memory allocated for a RLE data array
 void free_encoded_data(encoded_data_t* encoded_data) {
-    if (encoded_data != NULL) {
-        
-        // Free characters array
-        if (encoded_data->characters != NULL) {
-            free(encoded_data->characters);
-            encoded_data->characters = NULL; 
-        }
-        
-        // Free counts array
-        if (encoded_data->counts != NULL) {
-            free(encoded_data->counts);
-            encoded_data->counts = NULL;   
-        }
-        
-        // Set other fields to 0
-        encoded_data->size = 0;
-        encoded_data->capacity = 0;
+    
+    // Input validation
+    if (!encoded_data) {
+        return; 
     }
+        
+    // Free characters array
+    if (encoded_data->characters) {
+        free(encoded_data->characters);
+        encoded_data->characters = NULL; 
+    }
+        
+    // Free counts array
+    if (encoded_data->counts) {
+        free(encoded_data->counts);
+        encoded_data->counts = NULL;   
+    }
+
+    // Reset size and capacity
+    encoded_data->size = 0;
+    encoded_data->capacity = 0;
+
+    // Free the encoded data structure
+    free(encoded_data); 
 }
 
 // Function to write to the RLE data array and dynamically reallocate memory if necessary

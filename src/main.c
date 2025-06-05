@@ -11,137 +11,105 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    /* 2. READ FILES TO BUFFER */
+    /* 2. INITIALIZE THREADS AND TASK QUEUE */
 
-    // Initialize a buffer for reading the input files
-    size_t buffer_size = INITIAL_BUFFER_SIZE;
-    size_t total_read = 0; 
-    char* buffer = malloc(buffer_size);
-    if (!buffer) {
-        fprintf(stderr, "pzip: memory allocation error\n");
-        return 1;
-    }
-    char* current_position = buffer;
+    // Initialize a task queue
+    size_t num_workers = get_num_cores(); // Get the number of available CPU cores
+    task_queue_t queue = create_task_queue(num_workers * 2); // Capacity is twice the number of threads
     
-    // Read the input files to the buffer
+    // Initialize worker threads
+    pthread_t threads[num_workers];
+    if (init_workers(threads, num_workers, &queue) != SUCCESS) {
+        fprintf(stderr, "pzip: failed to initialize worker threads\n");
+        free_task_queue(&queue); // Free the task queue before exiting
+        return FAILURE; // Error
+    }
+
+    /* 3. PROCESS FILES ONE BY ONE TO CONSERVE MEMORY */
+
+    // Initialize a pointer to encoded data for handling file boundaries
+    encoded_data_t* file_boundary_encoded_data = NULL; 
+
+    // Loop trough the input files
     for (int i = 1; i < argc; i++) {
 
-        // Check if the argument is not NULL
-        if (!argv[i]) continue;
+        /* 3.1. MAP FILE INTO MEMORY */
 
-        // Open input file
-        FILE *file = fopen(argv[i], "r");
-        if (file == NULL) {
-            fprintf(stderr, "pzip: cannot open file\n");
+        // Map the file into memory
+        if (!argv[i]) continue; // Check that the argument is not NULL
+        mapped_file_t mapped_file = map_file(argv[i]);
+        if (mapped_file.data == NULL) {
+            fprintf(stderr, "pzip: cannot open file %s\n", argv[i]);
             return 1;
         }
 
-        // Read the file into the buffer and reallocate memory if necessary
-        while (!feof(file)) {
+        /* 3.2. ENCODE FILE CONTENTS */
 
-            // Increase the buffer size if necessary
-            if (current_position >= buffer + buffer_size) {
-                buffer_size *= 2;
-                char* new_buffer = realloc(buffer, buffer_size);
-                if (!new_buffer) {
-                    fprintf(stderr, "pzip: memory allocation failed\n");
-                    free(buffer);
-                    fclose(file);
-                    return 1;
-                }
-                current_position = new_buffer + total_read;
-                buffer = new_buffer;
-            }
+        // Determine chunk size and the number of chunks
+        size_t chunk_size = fmin(ceil((double)mapped_file.size / num_workers), MAX_CHUNK_SIZE);
+        size_t num_chunks = ceil((double)mapped_file.size / chunk_size);
+        encoded_data_t* encoding_results[num_chunks]; // Create an array of pointer to encoded data objects
+    
+        // Populate the task queue with encoding tasks, which are processed by worker threads
+        for (int i = 0; i < num_chunks; i++) {
             
-            // Read data from the file into the buffer
-            size_t chars_read = read_to_buffer(file, current_position, buffer + buffer_size);
-            if (chars_read == (size_t)-1) {
-                fprintf(stderr, "pzip: error reading file\n");
-                fclose(file);
-                free(buffer);
-                return 1;
-            }
-            current_position += chars_read;
-            total_read += chars_read;
+            // Create a task
+            encoding_results[i] = create_encoded_data(ceil((double)chunk_size / 2)); // Initialize output for the chunk
+            size_t task_size = fmin(chunk_size, mapped_file.size - i * chunk_size);
+            encoding_task_t task = create_encoding_task(&mapped_file.data[i * chunk_size], task_size, encoding_results[i]); 
+
+            // Add the task to the task queue to be processed (this will wait until there is room in the queue)
+            add_task(&queue, task);
         }
 
-        // Close the input file
-        fclose(file);
+        // Wait until all tasks are processed
+        while (queue.size > 0) { usleep(1000); } // Sleep for a short time to avoid busy waiting
+
+        // Unmap the file after all tasks have processed
+        unmap_file(&mapped_file);
+
+        /* 3.3. WRITE ENCODED DATA TO OUTPUT STREAM */
+
+        // Handle the boundary between the previous file and the current file
+        handle_boundary(file_boundary_encoded_data, encoding_results[0]); 
+
+        // Write the last chunk of the previous file to output stream
+        write_encoded_data_to_output(stdout, file_boundary_encoded_data); 
+        free_encoded_data(file_boundary_encoded_data); // Free the encoded data
+
+        // Iterate over the processed chunks to handle boundaries and write to output stream
+        for (int i = 0; i < num_chunks - 1; i++) {
+                    
+            // Handle the boundary on subsequent encoded chunks
+            handle_boundary(encoding_results[i], encoding_results[i + 1]); 
+                    
+            // Write the first chunk of the subsequent chunks to output stream
+            write_encoded_data_to_output(stdout, encoding_results[i]);             
+            free_encoded_data(encoding_results[i]); // Free the encoded data    
+            encoding_results[i] = NULL; // Set to NULL to avoid dangling pointer
+        }
+
+        // Store the last chunk of encoded data to handle the boundary
+        file_boundary_encoded_data = encoding_results[num_chunks-1];
+        encoding_results[num_chunks-1] = NULL;
+
+        /* 3.4. CLOSE THE CURRENT FILE */
+
     }
 
-    /* 3. COMPRESS FILE CONTENTS */
+    /* 4. WRITE THE LAST PIECE OF ENCODED DATA */
 
-    // Calculate the number of chunks based on the buffer size and maximum chunk size
-    size_t num_chunks = ceil((double)buffer_size / MAX_CHUNK_SIZE);
-    size_t num_threads = fmin(get_num_cores(), num_chunks);
+    // Write the last piece of encoded data to output stream
+    write_encoded_data_to_output(stdout, file_boundary_encoded_data); 
+    free_encoded_data(file_boundary_encoded_data); // Free the encoded data
 
-    printf("pzip: using %d threads\n", get_num_cores());
-    
-    // Initialize a task queue
-    task_queue_t queue = create_task_queue(num_threads * 2); // Capacity is twice the number of threads
-    
-    // Create an empty array of pointers to output
-    encoded_data_t compressed_data[num_chunks]; 
-        
-    // Create threads
-    pthread_t threads[num_threads];
-    for (int i = 0; i < num_threads; i++) { 
-        
-        // Initialize a thread
-        pthread_create(&threads[i], NULL, thread_worker, &queue); 
-    }
-    
-    // Generate tasks
-    for (int i = 0; i < num_chunks; i++) {
-        
-        // Initialize output
-        compressed_data[i] = create_encoded_data(INIT_CAPACITY);
-        
-        // Create a task
-        size_t task_buffer_size = fmin(MAX_CHUNK_SIZE, buffer_size - i * MAX_CHUNK_SIZE);
-        encoding_task_t task = create_encoding_task(&buffer[i * MAX_CHUNK_SIZE], task_buffer_size, &compressed_data[i]); 
-        
-        // Add the task to the task queue to be processed
-        // (this will wait if there is no room in the queue)
-        add_task(&queue, task);
-    }
+    /* 5. TERMINATE THREADS AND CLEAN UP */
     
     // Send termination signal to all threads
-    for (int i = 0; i < num_threads; i++) {
-        
-        // Get a termination task 
-        encoding_task_t termination_task = get_termination_task(); 
-        
-        // Add the termination task to the task queue
-        add_task(&queue, termination_task); 
-        
-    }
-        
-    // Wait until all threads have terminated
-    for (int i = 0; i < num_threads; i++) {
-        
-        // Wait for thread to return
-        pthread_join(threads[i], NULL);
-    }
+    terminate_workers(threads, num_workers, &queue);  
 
-    /* 4. COMBINE CHUNKS AND WRITE ENCODED DATA TO OUTPUT STREAM */
+    // Free the task queue
+    free_task_queue(&queue);
     
-    // Iterate over the chunks to handle boundaries and write to output stream
-    for (int i = 0; i < num_chunks - 1; i++) {
-                
-        // Handle the boundary on subsequent encoded chunks
-        handle_boundary(&compressed_data[i], &compressed_data[i + 1]); 
-                
-        // Write the first chunk of the subsequent chunks to output stream
-        write_text_to_buffer(stdout, compressed_data[i]); 
-    }
-
-    // Write the last chunk to output stream
-    write_text_to_buffer(stdout, compressed_data[num_chunks - 1]); 
-
-    /* 5. FREE ALLOCATED MEMORY */
-
-    // Free the buffer
-    free(buffer);
     return 0;
 }

@@ -10,13 +10,10 @@
 // Define return types
 #define SUCCESS 0
 #define FAILURE 1
+#define ERROR 1
 
 // Parallel processing constants
-#define MAX_NUM_THREADS 4
-#define MAX_CHUNK_SIZE 12
-
-// Buffer size for reading lines
-#define INITIAL_BUFFER_SIZE 1024
+#define MAX_CHUNK_SIZE 1024 * 10
 
 // Get the number of available CPU cores
 static inline int get_num_cores() {
