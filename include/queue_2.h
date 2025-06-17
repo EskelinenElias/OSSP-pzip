@@ -8,11 +8,10 @@
 
 // Task queue
 typedef struct {
-    size_t capacity; 
-    size_t front, rear, size;
     pthread_mutex_t lock;
-    pthread_cond_t not_empty, not_full;
-    encoding_task_t** tasks;
+    size_t index, num_tasks; 
+    encoding_task_t** tasks; 
+    pthread_cond_t tasks_available, tasks_completed;
 } task_queue_t;
 
 // Function to create a task queue

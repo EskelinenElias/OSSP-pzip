@@ -11,7 +11,7 @@
 typedef struct {
     char *data;
     size_t size;
-    int file; // File descriptor
+    int file;
 } mapped_file_t;
 
 // Map a single file into memory
