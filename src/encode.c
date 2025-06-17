@@ -3,13 +3,13 @@
 // Function to count run lengths for a input string
 int encode(char* input, size_t length, encoded_data_t* output) {
     
+    if (input==NULL) printf("Input is NULL\n; ");
+    if (length<=0) printf("Length is less than or equal to 0\n; ");
+    if (output==NULL) printf("Output is NULL\n; ");
+
     // Input validation 
-    if (input == NULL || length <= 0 || output == NULL) {
-        
-        // Invalid input
-        fprintf(stderr, "count_run_lengths: Invalid input.\n");
-        return FAILURE; // Error
-    }
+    if (input == NULL || length <= 0 || output == NULL) return FAILURE; 
+    
     
     // Initialize the tracked character to the first character of the input and set count to 1
     char tracked_char = input[0];

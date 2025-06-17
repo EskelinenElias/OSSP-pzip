@@ -9,7 +9,6 @@
 #define INIT_CAPACITY 16
 
 typedef struct {
-    int is_ready; 
     char* characters;
     size_t* counts;
     size_t size;

@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
+// Mapped file structure; represents a file mapped into memory
 typedef struct {
     char *data;
     size_t size;

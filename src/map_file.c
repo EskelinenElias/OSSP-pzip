@@ -1,10 +1,11 @@
-#include "../include/mmap_file.h"
+#include "../include/map_file.h"
 
+// Function to map a file into memory
 mapped_file_t map_file(const char *filepath) {
     mapped_file_t result = {NULL, 0, -1};
     
     // Open file
-    result.file = open(filepath, O_RDONLY);
+    result.file = open(filepath, 'r');
     if (result.file == -1) {
         return result;
     }
@@ -28,14 +29,23 @@ mapped_file_t map_file(const char *filepath) {
     return result;
 }
 
-void unmap_file(mapped_file_t *mapping) {
-    if (!mapping || !mapping->data) return;
+// Function to unmap a file from memory
+void unmap_file(mapped_file_t* mapping) {
     
-    munmap(mapping->data, mapping->size);
-    if (mapping->file != -1) {
-        close(mapping->file);
+    // Check for null pointer
+    if (!mapping) return;
+    
+    // Unmap data
+    if (mapping->data) {
+        
+        // Unmap data and close file
+        munmap(mapping->data, mapping->size);
+        if (mapping->file != -1) {
+            close(mapping->file);
+        }
     }
     
+    // Reset pointers
     mapping->data = NULL;
     mapping->size = 0;
     mapping->file = -1;
