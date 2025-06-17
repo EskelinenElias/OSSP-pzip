@@ -1,39 +1,34 @@
-#include "../include/task_queue.h"
+#include "../include/queue_2.h"
 
-task_queue_t* create_task_queue(size_t capacity) {
+task_queue_t* init_queue() {
     
     // Initialize task queue and check for errors
     task_queue_t* queue = malloc(sizeof(task_queue_t)); 
-    if (queue == NULL) return NULL; 
-    
-    // Allocate memory for tasks and check for errors
-    queue->tasks = (encoding_task_t**)malloc(capacity * sizeof(encoding_task_t*));
-    if (queue->tasks == NULL) { 
-        free(queue); 
+    if (!queue) {
+        
+        // Error; failed to allocate memory for task queue
+        fprintf(stderr, "Error: Failed to allocate memory for task queue\n");
         return NULL; 
-    }
+    }    
 
     // Set queue fields
-    queue->capacity = capacity; // Maximum possible size of the queue
-    queue->front = 0; // First element of the queue
-    queue->rear = 0; // Last element of the queue
-    queue->size = 0; // Current size of the queue
-    
+    queue->tasks = NULL; 
+    queue->index = 0; // Index to the current task in the queue
+    queue->num_tasks = 0; // Number of tasks in the queue
+
     // Initialize mutex lock and check for errors
     if (pthread_mutex_init(&queue->lock, NULL) != 0) {
         
         // Error; free allocated memory
-        free(queue->tasks); 
         free(queue); 
         return NULL; 
     };
     
-    // Initialize condition variables and check for errors
-    if (pthread_cond_init(&queue->not_empty, NULL) != 0 || pthread_cond_init(&queue->not_full, NULL) != 0) { 
+    // Initialize condition variable for signaling tasks are available and check for errors
+    if (pthread_cond_init(&queue->tasks_available, NULL) != 0) { 
             
         // Error; free allocated memory and destroy mutex
         pthread_mutex_destroy(&queue->lock); 
-        free(queue->tasks);
         free(queue); 
         return NULL; 
     }
@@ -42,13 +37,67 @@ task_queue_t* create_task_queue(size_t capacity) {
     return queue; 
 }
 
+int add_tasks(task_queue_t* queue, encoding_task_t** tasks, size_t num_tasks) {
+    
+    // Input validation
+    if (queue == NULL || tasks == NULL || num_tasks == 0) return FAILURE; 
+    
+    // Acquire lock
+    pthread_mutex_lock(&queue->lock);
+    
+    // Add tasks 
+    queue->tasks = tasks; 
+    queue->num_tasks = num_tasks;
+    queue->index = 0; 
+    
+    // Signal to the main thread that tasks are available
+    pthread_cond_signal(&queue->tasks_available);
+    
+    // Release the lock
+    pthread_mutex_unlock(&queue->lock);
+    
+    // Successfully added tasks
+    return SUCCESS;
+}
+
+// Function to claim a task from the queue
+encoding_task_t* claim_task(task_queue_t* queue) {
+    
+    // Input validation
+    if (queue == NULL) return NULL;
+    
+    // Acquire lock
+    pthread_mutex_lock(&queue->lock);
+    
+    // If there are no tasks available, wait for tasks to become available
+    while (queue->index == queue->num_tasks) {
+        pthread_cond_wait(&queue->tasks_available, &queue->lock);
+    }
+    
+    // Claim a task from the queue
+    encoding_task_t* task = queue->tasks[queue->index++];
+    
+    // Release the lock
+    pthread_mutex_unlock(&queue->lock);
+    
+    // Return claimed task
+    return task;
+}
+
 // Function to free the task queue
-void free_task_queue(task_queue_t* queue) {
+void free_queue(task_queue_t* queue) {
+    
+    // Input validation
     if (queue == NULL) { return; }
-    free(queue->tasks);
+    
+    // Destroy mutex lock
     pthread_mutex_destroy(&queue->lock);
-    pthread_cond_destroy(&queue->not_empty);
-    pthread_cond_destroy(&queue->not_full);
+    
+    // Destroy condition variable
+    pthread_cond_destroy(&queue->tasks_available);
+    
+    // Free memory
+    free(queue); 
 }
 
 encoding_task_t* get_task(task_queue_t *queue) {
