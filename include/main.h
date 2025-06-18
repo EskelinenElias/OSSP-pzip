@@ -7,19 +7,18 @@
 #include <math.h>
 #include "../include/map_file.h"
 #include "../include/constants.h"
-#include "../include/task_queue.h"
+#include "../include/task_manager.h"
 #include "../include/worker.h"
 #include "../include/encode.h"
 #include "../include/encoded_data.h"
 #include "../include/write_to_output.h"
 
 typedef struct {
-    task_queue_t* queue;
+    task_manager_t* manager;
     pthread_t* workers;
     size_t num_workers;
-    encoding_task_t* tasks;
-    size_t num_tasks;
-    encoding_task_t* boundary_task; 
+    result_t* current_result;
+    result_t* next_result; 
     mapped_file_t file; 
 } cleanup_args_t;
 
@@ -29,7 +28,7 @@ typedef struct {
 } workers_list_t;
 
 typedef struct {
-    encoding_task_t* tasks;
+    task_t* tasks;
     size_t num_tasks;
 } tasks_list_t; 
 

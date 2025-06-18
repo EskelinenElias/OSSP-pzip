@@ -1,5 +1,5 @@
-#ifndef TASK_H
-#define TASK_H
+#ifndef ENCODING_TASK_H
+#define ENCODING_TASK_H
 
 #include <stdatomic.h>
 #include <stdio.h>
@@ -33,4 +33,4 @@ void free_encoding_task(encoding_task_t* task);
 // Function to get termination task
 encoding_task_t get_termination_task(); 
 
-#endif // TASK_H
+#endif // ENCODING_TASK_H

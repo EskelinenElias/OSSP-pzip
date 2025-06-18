@@ -23,6 +23,8 @@
 
 #define MAX_THREADS 1
 
+#define MAX_CAPACITY 1000
+
 // Get the number of available CPU cores
 static inline size_t get_num_cores() {
     size_t num_cores = fmin(sysconf(_SC_NPROCESSORS_ONLN), MAX_THREADS);
