@@ -9,7 +9,7 @@ void* thread_worker(void* arg) {
     // Process tasks until a termination task is acquired
     task_t* task; 
     while ((task = claim_task(manager)) != NULL) {       
-        
+                
         // Allocate memory for the output and check for errors
         result_t* result = init_result(ceil((float)task->length / 2));
         if (!result) {
@@ -18,7 +18,7 @@ void* thread_worker(void* arg) {
             fprintf(stderr, "Terminating thread due to memory allocation failure"); 
             return NULL; 
         }
-
+        
         // Process the current task 
         if (encode(task->data, task->length, result) != SUCCESS) {
             
@@ -27,7 +27,7 @@ void* thread_worker(void* arg) {
             free_result(result); 
             return NULL; 
         }; 
-        
+                
         // Yield the result to the manager
         if (yield_result(manager, result, task->index) != SUCCESS) {
             
@@ -48,7 +48,7 @@ pthread_t* init_workers(size_t num_workers, task_manager_t *manager) {
     if (!workers) {
         
         // Failed to allocate memory for worker threads
-        fprintf(stderr, "Failed to allocate memory for worker threads");
+        fprintf(stderr, "Failed to allocate memory for workers");
         return NULL;
     }
     
@@ -59,24 +59,42 @@ pthread_t* init_workers(size_t num_workers, task_manager_t *manager) {
         if (pthread_create(&workers[i], NULL, thread_worker, manager) != 0) {
                         
             // Failed to initialize worker
+            fprintf(stderr, "Failed to initialize workers");
             terminate_workers(workers, num_workers, manager); 
             return NULL;
         }
     }
     
     // Successfully initialized all worker threads
-    return SUCCESS;
+    return workers;
 }
 
 // Function to terminate all worker threads
 int terminate_workers(pthread_t *threads, size_t num_workers, task_manager_t *manager) {
     
     // Input validation
-    if (!threads || !manager) return SUCCESS;
+    if (!threads || !manager) {
+        
+        // Invalid input
+        fprintf(stderr, "Invalid input");
+        return ERROR;
+    };
     
     // Send termination signal to all threads
-    for (int i = 0; i < num_workers; i++) yield_termination_task(manager); 
-
+    for (int i = 0; i < num_workers; i++) {
+        
+        // Yield a termination task to one worker
+        if (yield_termination_task(manager) != SUCCESS) {
+            
+            // Failed to yield termination task 
+            fprintf(stderr, "Failed to yield termination task");
+            
+            // Force termination 
+            force_termination(manager); 
+            break; 
+        }
+    }
+    
     // Wait until all threads have terminated
     for (int i = 0; i < num_workers; i++) {
         

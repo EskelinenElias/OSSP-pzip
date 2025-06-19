@@ -12,7 +12,8 @@
 // Task manager
 typedef struct {
     pthread_mutex_t* tasks_lock; 
-    size_t next_task, next_result, next_slot, current_size, capacity;  
+    size_t next_task, next_result, next_slot;  
+    size_t num_available_tasks, current_size, capacity; 
     pthread_cond_t* room_available; 
     pthread_cond_t* tasks_available;
     pthread_cond_t* results_available;
@@ -40,5 +41,7 @@ int yield_termination_task(task_manager_t* manager);
 
 // Function to free memory allocated to task manager and destroy mutex lock and condition variables
 void free_manager(task_manager_t* manager);
+
+int force_termination(task_manager_t* manager); 
 
 #endif // QUEUE_H

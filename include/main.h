@@ -19,8 +19,8 @@ typedef struct {
     size_t num_workers;
     result_t* current_result;
     result_t* next_result; 
-    mapped_file_t file; 
-} cleanup_args_t;
+    mapped_file_t* file; 
+} process_vars_t;
 
 typedef struct {
     pthread_t* threads; 

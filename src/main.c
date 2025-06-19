@@ -1,17 +1,30 @@
 #include "../include/main.h"
 
 // Cleanup routine
-void cleanup_routine(cleanup_args_t* args) {
-    if (args->workers && args->num_workers > 0) terminate_workers(args->workers, args->num_workers, args->manager);
-    if (args->manager) free_manager(args->manager);
-    if (args->current_result) free_result(args->current_result);
-    if (args->next_result) free_result(args->next_result); 
-    unmap_file(&args->file); 
-    args->manager = NULL;
-    args->workers = NULL; 
-    args->num_workers = 0;
-    args->current_result = NULL;
-    args->next_result = NULL;
+void cleanup_routine(process_vars_t* process) {
+        
+    // Terminate workers 
+    if (process->workers && process->num_workers > 0) {
+        terminate_workers(process->workers, process->num_workers, process->manager);
+    }
+            
+    // Free task manager
+    if (process->manager) free_manager(process->manager);
+    
+    // Free results
+    if (process->current_result) free_result(process->current_result);
+    if (process->next_result) free_result(process->next_result); 
+    
+    // Unmap file
+    if (process->file) unmap_file(process->file); 
+        
+    // Set pointers to NULL to avoid dangling pointers
+    process->manager = NULL;
+    process->workers = NULL; 
+    process->num_workers = 0;
+    process->current_result = NULL;
+    process->next_result = NULL;
+    process->file = NULL; 
 }
 
 // Main function 
@@ -21,14 +34,16 @@ int main(int argc, char *argv[]) {
 
     // Check that the correct number of arguments were provided
     if (argc < 2) {
-        fprintf(stdout, "pzip: file1 [file2 ...]\n");
+        
+        // Print instructions and exit
+        printf("pzip: file1 [file2 ...]\n");
         return 1;
     }
 
     /* 2. INITIALIZE CLEANUP ROUTINE, TASK QUEUE AND THREADS */ 
     
     // Initialize cleanup arguments
-    cleanup_args_t process = {NULL, NULL, 0, NULL, 0, NULL};
+    process_vars_t process = {NULL, NULL, 0, NULL, NULL, NULL};
         
     // Determine the number of available recources
     
@@ -62,10 +77,10 @@ int main(int argc, char *argv[]) {
         // Map the file into memory and check for errors
         if (!argv[i]) continue; // Check that the argument is not NULL
         process.file = map_file(argv[i]);
-        if (process.file.data == NULL) {
+        if (process.file->data == NULL) {
             
             // Error; print error message, perform cleanup, and exit
-            printf("Failed to open file %s\n", argv[i]);
+            fprintf(stderr, "Failed to open file %s\n", argv[i]);
             cleanup_routine(&process); 
             return ERROR;
         }
@@ -73,62 +88,75 @@ int main(int argc, char *argv[]) {
         /* 3.2. ENCODE FILE CONTENTS */
 
         // Determine chunk size and the number of chunks and initialize an array for tasks
-        size_t task_size = fmin(ceil((double)process.file.size / process.num_workers), MAX_CHUNK_SIZE);
-        size_t num_tasks = ceil((double)process.file.size / task_size);
+        size_t task_size = fmin(ceil((double)process.file->size / process.num_workers), MAX_CHUNK_SIZE);
+        size_t num_tasks = ceil((double)process.file->size / task_size);
         
         // Add tasks to the task queue
         size_t i = 0; 
         for (size_t t = 0; t < num_tasks; t++) {
             
             // Add the task to the task manager
-            yield_task(process.manager, process.file.data + i, fmin(task_size, process.file.size - i));
+            if (yield_task(process.manager, process.file->data + i, fmin(task_size, process.file->size - i)) != SUCCESS) {
+                
+                // Failed to yield task to manager
+                fprintf(stderr, "Failed to yield task to manager\n");
+                cleanup_routine(&process); 
+                return ERROR;
+            }
 
             // Increment the file index for the next chunk
             i += task_size;
         }
-        
-        /* 3.3. WRITE ENCODED DATA TO OUTPUT STREAM */
 
+        /* 3.3. WRITE ENCODED DATA TO OUTPUT STREAM */
+        
         // Iterate over the processed chunks to handle boundaries and write to output stream
-        while ((process.next_result = claim_result(process.manager)) != NULL) {
+        while ((process.next_result = claim_result(process.manager))) {
             
             if (process.current_result) {
-                
+                                
                 // Handle the boundary between the current task and the next task
                 handle_boundary(process.current_result, process.next_result); 
-                        
+                                        
                 // Write the encoded data to the output stream and check for errors
                 if (write_encoded_data_to_output(process.current_result) != SUCCESS) {
                     
                     // Error; perform cleanup routine 
-                    printf("Error writing encoded data to output stream\n");
+                    fprintf(stderr, "Error writing encoded data to output stream\n");
                     cleanup_routine(&process); 
                     return ERROR;
                 }       
-      
+                      
                 // Free the current result        
                 free_result(process.current_result);
+                process.current_result = NULL; 
             }
-            
+                        
             // Swap the next result to the current result
             process.current_result = process.next_result;
+            process.next_result = NULL; 
         }
-
+                
         /* 3.4. CLOSE THE CURRENT FILE */
         
         // Unmap the file after all tasks have processed
-        unmap_file(&process.file);
+        unmap_file(process.file);
+        process.file = NULL; 
 
     }
     
     /* 4. WRITE THE LAST PIECE OF ENCODED DATA TO OUTPUT STREAM */
-
-    // Write the last piece of encoded data to output stream
-    write_encoded_data_to_output(process.next_result); 
     
-    // Free the boundary task
-    free_result(process.next_result);
-
+    // Check the last piece of encoded data
+    if (process.current_result) {
+        
+        // Write the last piece of encoded data to output stream
+        write_encoded_data_to_output(process.current_result); 
+    
+        // Free the boundary task
+        free_result(process.current_result);
+        process.current_result = NULL; 
+    }
     /* 5. TERMINATE THREADS AND CLEAN UP */
     
     // Send termination signal to all workers

@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <stdlib.h>
 
 // Mapped file structure; represents a file mapped into memory
 typedef struct {
@@ -15,7 +16,7 @@ typedef struct {
 } mapped_file_t;
 
 // Map a single file into memory
-mapped_file_t map_file(const char *filepath);
+mapped_file_t* map_file(const char *filepath);
 
 // Unmap a single file
 void unmap_file(mapped_file_t *mapping);

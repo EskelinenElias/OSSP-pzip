@@ -86,7 +86,7 @@ int free_result(result_t* result) {
     if (!result) {
         
         // Invalid input
-        fprintf(stderr, "Invalid input\n"); 
+        fprintf(stderr, "Cannot free result, result is NULL\n"); 
         return ERROR; 
     }
         
@@ -98,6 +98,9 @@ int free_result(result_t* result) {
 
     // Free the data structure
     free(result); 
+    
+    // Set the pointer to NULL to avoid dangling pointer
+    result = NULL;
     
     // Successfully freed result
     return SUCCESS; 

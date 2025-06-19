@@ -21,7 +21,7 @@ task_t* create_task(char* data, size_t length, size_t index) {
 }
 
 int free_task(task_t* task) {
-    
+        
     // Free allocated memory for task
     free(task);
     
