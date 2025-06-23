@@ -145,7 +145,7 @@ task_manager_t* init_manager(size_t capacity) {
 int yield_task(task_manager_t* manager, char* data, size_t length) {
     
     // Input validation
-    if (!manager) {  // NULL tasks are allowed as they act as termination signals
+    if (!manager) { // Empty tasks (data = NULL, length = 0) are allowed, as they act as EOF
         
         // Invalid input
         fprintf(stderr, "Error: Manager is NULL\n");
@@ -172,7 +172,7 @@ int yield_task(task_manager_t* manager, char* data, size_t length) {
         }
         
         // Can't yield task 
-        return -1; 
+        return FAILURE; 
     }
         
     // Create a new task and check for errors
@@ -264,7 +264,7 @@ int yield_result(task_manager_t* manager, result_t* result, size_t task_index) {
     if (!manager || !result || task_index < 0 || task_index >= manager->capacity) {
         
         // Invalid input
-        fprintf(stderr, "Error: Invalid input\n");
+        fprintf(stderr, "Error: Invalid input: %p, %p, %lu\n", manager, result, task_index);
         return ERROR; 
     } 
     
@@ -504,3 +504,14 @@ void free_manager(task_manager_t* manager) {
     if (manager->results) free(manager->results);
     free(manager); 
 }
+
+// int is_full(task_manager_t* manager) {
+    
+//     // Input validation
+//     if (!manager) 
+        
+//         return ERROR;
+    
+//     // A
+    
+// }

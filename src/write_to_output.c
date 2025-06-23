@@ -1,5 +1,7 @@
 #include "../include/write_to_output.h"
 
+const int TEST = FALSE; 
+
 // Function to write encoded data to standard output as bytes
 int write_encoded_data_to_output(result_t* result) {
     
@@ -9,6 +11,14 @@ int write_encoded_data_to_output(result_t* result) {
         // Invalid input
         fprintf(stderr, "Failed to write result to output. Invalid input\n");
         return ERROR; 
+    }
+    
+    // Check if the test flag is set
+    if (TEST) {
+        
+        // Write test data to output as text
+        write_encoded_text_to_output(result); 
+        return SUCCESS; 
     }
 
     // Iterate through the encoded data

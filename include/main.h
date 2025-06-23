@@ -19,7 +19,8 @@ typedef struct {
     size_t num_workers;
     result_t* current_result;
     result_t* next_result; 
-    mapped_file_t* file; 
+    mapped_file_t** files; 
+    size_t num_files;
 } process_vars_t;
 
 typedef struct {

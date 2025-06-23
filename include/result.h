@@ -20,6 +20,6 @@ result_t* init_result(size_t initial_capacity);
 int reallocate_result(result_t* result, size_t new_capacity); 
 
 // Function to free the memory allocated for a result data structure
-int free_result(result_t* result); 
+result_t* free_result(result_t* result); 
 
 #endif // RESULT_H

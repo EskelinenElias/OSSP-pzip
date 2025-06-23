@@ -5,35 +5,54 @@ void* thread_worker(void* arg) {
     
     // Cast arguments
     task_manager_t *manager = (task_manager_t *)arg;
+    
+    // Initialize variables
+    task_t* task = NULL; 
+    result_t* result = NULL; 
         
     // Process tasks until a termination task is acquired
-    task_t* task; 
-    while ((task = claim_task(manager)) != NULL) {       
+    while ((task = claim_task(manager)) != NULL) {
+         
+        // Check if the task is an empty task (indicates EOF)
+        if (task->length == 0) {
+            
+            // Initiate an empty result and check for errors
+            result = init_result(0);
+            if (!result) {
                 
-        // Allocate memory for the output and check for errors
-        result_t* result = init_result(ceil((float)task->length / 2));
-        if (!result) {
+                // Failed to allocate memory for the result
+                fprintf(stderr, "Terminating thread due to memory allocation failure"); 
+                return NULL; 
+            }
+                        
+        } else {
+                
+            // Allocate memory for the result and check for errors
+            result = init_result(ceil((float)task->length / 2));
+            if (!result) {
+                
+                // Failed to allocate memory for the result
+                fprintf(stderr, "Terminating thread due to memory allocation failure"); 
+                return NULL; 
+            }
             
-            // Failed to allocate memory for the result
-            fprintf(stderr, "Terminating thread due to memory allocation failure"); 
-            return NULL; 
-        }
+            // Process the current task 
+            if (encode(task->data, task->length, result) != SUCCESS) {
+                
+                // Terminate the thread 
+                fprintf(stderr, "Terminating thread due to memory encoding failure"); 
+                free_result(result); 
+                return NULL; 
+            }; 
         
-        // Process the current task 
-        if (encode(task->data, task->length, result) != SUCCESS) {
-            
-            // Terminate the thread 
-            fprintf(stderr, "Terminating thread due to memory encoding failure"); 
-            free_result(result); 
-            return NULL; 
-        }; 
+        }
                 
         // Yield the result to the manager
         if (yield_result(manager, result, task->index) != SUCCESS) {
             
             // Failed to yield result to manager
-            fprintf(stderr, "Terminating thread due to result yield failure"); 
-            free_result(result); 
+            fprintf(stderr, "Terminating thread due to result yield failure\n"); 
+            if (result) free_result(result); 
             return NULL; 
         };
     }

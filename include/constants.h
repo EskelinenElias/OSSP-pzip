@@ -10,7 +10,7 @@
 
 // Define return types
 #define SUCCESS 0
-#define FAILURE 1
+#define FAILURE 2
 #define ERROR 1
 
 // Encoding task status codes
@@ -20,8 +20,9 @@
 
 // Parallel processing constants
 #define MAX_CHUNK_SIZE 1024 * 10
+#define TASK_SIZE 1024 * 10
 
-#define MAX_THREADS 1
+#define MAX_THREADS 128
 
 #define MAX_CAPACITY 1000
 

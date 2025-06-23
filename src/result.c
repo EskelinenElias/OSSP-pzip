@@ -11,6 +11,14 @@ result_t* init_result(size_t initial_capacity) {
         fprintf(stderr, "Failed to allocate memory for result\n");
         return NULL;
     }    
+    
+    // Set result fields
+    result->characters = NULL; 
+    result->counts = NULL; 
+    result->capacity = initial_capacity;
+    
+    // Check if capacity if 0; this is allowed, as empty result acts as EOF
+    if (initial_capacity == 0) return result; 
 
     // Allocate memory for characters
     result->characters = (char*)malloc(initial_capacity * sizeof(char));
@@ -32,9 +40,6 @@ result_t* init_result(size_t initial_capacity) {
         free(result);
         return NULL;
     }
-    
-    // Set result fields
-    result->capacity = initial_capacity;
     
     // Successfully created result data structure
     return result; 
@@ -80,14 +85,14 @@ int reallocate_result(result_t* result, size_t new_capacity) {
 }
 
 // Function to free the memory allocated for a result data structure
-int free_result(result_t* result) {
+result_t* free_result(result_t* result) {
     
     // Input validation
     if (!result) {
         
         // Invalid input
         fprintf(stderr, "Cannot free result, result is NULL\n"); 
-        return ERROR; 
+        return NULL; 
     }
         
     // Free characters array
@@ -103,7 +108,7 @@ int free_result(result_t* result) {
     result = NULL;
     
     // Successfully freed result
-    return SUCCESS; 
+    return NULL; 
 }
 
 // // Function to write to the RLE data array and dynamically reallocate memory if necessary
