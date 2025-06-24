@@ -1,6 +1,6 @@
 #include "../include/task.h"
 
-task_t* create_task(char* data, size_t length, size_t index) {
+task_t* init_task(char* data, size_t size, result_t** result, int* status) {
     
     // Allocate memory for task
     task_t* task = malloc(sizeof(task_t));
@@ -13,8 +13,9 @@ task_t* create_task(char* data, size_t length, size_t index) {
     
     // Initialize task fields
     task->data = data;
-    task->length = length;
-    task->index = index;
+    task->size = size;
+    task->result = result;
+    task->status = status;
     
     // Successfully created task
     return task;

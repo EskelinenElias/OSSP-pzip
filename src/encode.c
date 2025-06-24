@@ -83,7 +83,10 @@ int handle_boundary(result_t* left, result_t* right) {
     
     // Check if the left and right object contain data
     if (left == NULL || right == NULL || left->capacity == 0 || right->capacity == 0) {
-        return SUCCESS; 
+        
+        // Invalid input
+        fprintf(stderr, "Failed to handle boundary. One or both objects are NULL\n");
+        return ERROR; 
     }
 
     // Get the last character from the left object

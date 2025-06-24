@@ -9,13 +9,14 @@
 
 // Input data structure; represents a chunk of input data
 typedef struct {
-    size_t index;               // Index of the task 
-    char *data;                 // Pointer to the start of an input string 
-    size_t length;              // Length of input string to process
+    char* data; 
+    size_t size;
+    result_t** result; 
+    int* status;
 } task_t;
 
 // Function to initialize a task
-task_t* create_task(char* input, size_t length, size_t index);
+task_t* init_task(char* data, size_t size, result_t** result, int* status);
 
 // Function to free the memory allocated for an encoding task structure
 int free_task(task_t* task);

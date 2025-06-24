@@ -14,7 +14,7 @@ void* thread_worker(void* arg) {
     while ((task = claim_task(manager)) != NULL) {
          
         // Check if the task is an empty task (indicates EOF)
-        if (task->length == 0) {
+        if (task->size == 0) {
             
             // Initiate an empty result and check for errors
             result = init_result(0);
@@ -28,7 +28,7 @@ void* thread_worker(void* arg) {
         } else {
                 
             // Allocate memory for the result and check for errors
-            result = init_result(ceil((float)task->length / 2));
+            result = init_result(ceil((float)task->size / 2));
             if (!result) {
                 
                 // Failed to allocate memory for the result
@@ -37,7 +37,7 @@ void* thread_worker(void* arg) {
             }
             
             // Process the current task 
-            if (encode(task->data, task->length, result) != SUCCESS) {
+            if (encode(task->data, task->size, result) != SUCCESS) {
                 
                 // Terminate the thread 
                 fprintf(stderr, "Terminating thread due to memory encoding failure"); 
@@ -48,7 +48,7 @@ void* thread_worker(void* arg) {
         }
                 
         // Yield the result to the manager
-        if (yield_result(manager, result, task->index) != SUCCESS) {
+        if (yield_result(manager, task, result) != SUCCESS) {
             
             // Failed to yield result to manager
             fprintf(stderr, "Terminating thread due to result yield failure\n"); 

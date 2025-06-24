@@ -2,6 +2,7 @@
 #define WORKER_H
 
 #include <stdio.h>
+
 #include "../include/constants.h"
 #include "../include/encode.h"
 #include "../include/task_manager.h"
