@@ -8,17 +8,21 @@ void* thread_worker(void* arg) {
     
     // Initialize variables
     task_t* task = NULL; 
-    result_t* result = NULL; 
+    result_data_t* result_data = NULL; 
         
     // Process tasks until a termination task is acquired
     while ((task = claim_task(manager)) != NULL) {
-         
+        
+        // Get task data
+        task_data_t task_data = task->data;
+        result_t** result = task->result; 
+                 
         // Check if the task is an empty task (indicates EOF)
-        if (task->size == 0) {
+        if (task_data.size == 0) {
             
             // Initiate an empty result and check for errors
-            result = init_result(0);
-            if (!result) {
+            result_data = init_result(0);
+            if (!result_data) {
                 
                 // Failed to allocate memory for the result
                 fprintf(stderr, "Terminating thread due to memory allocation failure"); 
@@ -28,8 +32,8 @@ void* thread_worker(void* arg) {
         } else {
                 
             // Allocate memory for the result and check for errors
-            result = init_result(ceil((float)task->size / 2));
-            if (!result) {
+            result_data = init_result(ceil((float)task_data.size / 2));
+            if (!result_data) {
                 
                 // Failed to allocate memory for the result
                 fprintf(stderr, "Terminating thread due to memory allocation failure"); 
@@ -37,22 +41,22 @@ void* thread_worker(void* arg) {
             }
             
             // Process the current task 
-            if (encode(task->data, task->size, result) != SUCCESS) {
+            if (encode(&task_data, result_data) != SUCCESS) {
                 
                 // Terminate the thread 
                 fprintf(stderr, "Terminating thread due to memory encoding failure"); 
-                free_result(result); 
+                free_result(result_data); 
                 return NULL; 
             }; 
         
         }
                 
         // Yield the result to the manager
-        if (yield_result(manager, task, result) != SUCCESS) {
+        if (yield_result(manager, result, result_data) != SUCCESS) {
             
             // Failed to yield result to manager
             fprintf(stderr, "Terminating thread due to result yield failure\n"); 
-            if (result) free_result(result); 
+            if (result_data) free_result(result_data); 
             return NULL; 
         };
     }
@@ -109,7 +113,7 @@ int terminate_workers(pthread_t *threads, size_t num_workers, task_manager_t *ma
             fprintf(stderr, "Failed to yield termination task");
             
             // Force termination 
-            force_termination(manager); 
+            // force_termination(manager); 
             break; 
         }
     }

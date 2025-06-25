@@ -3,12 +3,14 @@
 
 #include "stdio.h"
 #include "stdlib.h"
+
+#include "../include/task.h"
 #include "../include/result.h"
 
 // Function to count run lengths for a input string
-int encode(char* input, size_t length, result_t* result);
+result_data_t* encode(task_data_t* task_data);
 
 // Function to handle the boundary on subsequent run lenght objects
-int handle_boundary(result_t* left_obj, result_t* right_obj); 
+int handle_boundary(result_data_t* left, result_data_t* right); 
 
 #endif // ENCODE_H

@@ -1,26 +1,26 @@
 #include "../include/encode.h"
 
 // Function to count run lengths for a input string
-int encode(char* input, size_t length, result_t* result) {
+result_data_t* encode(task_data_t* task_data) {
     
     // Input validation 
-    if (input == NULL || length <= 0 || result == NULL) {
+    if (!task_data || (task_data->data == NULL && task_data->size > 0)) {
         
         // Invalid input
         fprintf(stderr, "Failed to encode data. Invalid input\n");
-        return FAILURE; 
+        return NULL; 
     }
     
     // Initialize the tracked character to the first character of the input and set count to 1
-    char tracked_char = input[0];
+    char tracked_char = task_data->data[0];
     size_t tracked_count = 1;
     size_t index = 0; 
     
     // Count run lenghts of subsequent matching characters in the input
-    for (size_t i = 1; i < length; i++) {
+    for (size_t i = 1; i < task_data->size; i++) {
         
         // Check if the tracked character is the same as the current character in the input
-        if (tracked_char == input[i]) {
+        if (tracked_char == task_data->data[i]) {
             
             // Increment count if the characters match
             tracked_count++;
@@ -28,10 +28,10 @@ int encode(char* input, size_t length, result_t* result) {
         } else {
             
             // Increase result capacity if necessary
-            if (index == result->capacity) {
+            if (index == result_data->capacity) {
                 
                 // Double the capacity of the result
-                if (reallocate_result(result, result->capacity * 2) != SUCCESS) {
+                if (reallocate_result_data(result_data, result_data->capacity * 2) != SUCCESS) {
                     
                     // Handle failure to increase capacity
                     fprintf(stderr, "Failed to encode data. Failed to increase capacity\n");
@@ -40,23 +40,23 @@ int encode(char* input, size_t length, result_t* result) {
             }
             
             // Append the tracked character and count to the result
-            result->characters[index] = tracked_char;
-            result->counts[index] = tracked_count;
+            result_data->characters[index] = tracked_char;
+            result_data->counts[index] = tracked_count;
             
             // Increment index
             index++;
             
             // Set the tracked character to the current character in the input and set count to 1
-            tracked_char = input[i];
+            tracked_char = task_data->data[i];
             tracked_count = 1;
         }
     }
     
     // Increase result capacity if necessary
-    if (index == result->capacity) {
+    if (index == result_data->capacity) {
         
         // Double the capacity of the result
-        if (reallocate_result(result, result->capacity * 2) != SUCCESS) {
+        if (reallocate_result_data(result_data, result_data->capacity * 2) != SUCCESS) {
             
             // Handle failure to increase capacity
             fprintf(stderr, "Failed to encode data. Failed to increase capacity\n");
@@ -65,21 +65,21 @@ int encode(char* input, size_t length, result_t* result) {
     }
 
     // Append the tracked character and count to the output
-    result->characters[index] = tracked_char;
-    result->counts[index] = tracked_count;
+    result_data->characters[index] = tracked_char;
+    result_data->counts[index] = tracked_count;
     
     // Increment index
     index++;
     
     // Deallocate unused memory
-    reallocate_result(result, index); 
+    reallocate_result_data(result_data, index); 
     
     // Successfully encoded data
     return SUCCESS; 
 }
 
 // Function to handle the boundary on subsequent results 
-int handle_boundary(result_t* left, result_t* right) {
+int handle_boundary(result_data_t* left, result_data_t* right) {
     
     // Check if the left and right object contain data
     if (left == NULL || right == NULL || left->capacity == 0 || right->capacity == 0) {

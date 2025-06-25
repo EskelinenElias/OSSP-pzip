@@ -6,8 +6,8 @@
 
 #include "../include/constants.h"
 #include "../include/encode.h"
-#include "../include/task.h"
-#include "../include/result.h"
+#include "../include/task_data.h"
+#include "../include/result_data.h"
 #include "../include/file_manager.h"
 #include "../include/task_manager.h"
 #include "../include/write_to_output.h"

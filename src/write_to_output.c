@@ -3,7 +3,7 @@
 const int TEST = FALSE; 
 
 // Function to write encoded data to standard output as bytes
-int write_encoded_data_to_output(result_t* result) {
+int write_encoded_data_to_output(result_data_t* result) {
     
     // Input validation
     if (!result) {
@@ -34,7 +34,7 @@ int write_encoded_data_to_output(result_t* result) {
 }
 
 // Function to write encoded data to standard output as text (for testing purposes)
-int write_encoded_text_to_output(result_t* result) {
+int write_encoded_text_to_output(result_data_t* result) {
     
     // Input validation
     if (!result) {

@@ -16,7 +16,7 @@
 // Encoding task status codes
 #define COMPLETED 1
 #define FAILED 2
-#define IN_PROGRESS 0
+#define PENDING 0
 
 // Parallel processing constants
 #define MAX_CHUNK_SIZE 1024 * 10

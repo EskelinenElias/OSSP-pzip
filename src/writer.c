@@ -60,8 +60,8 @@ void* writer(void* args) {
     }
     
     // Initialize variables
-    result_t* current_result = NULL; 
-    result_t* next_result = NULL; 
+    result_data_t* current_result = NULL; 
+    result_data_t* next_result = NULL; 
         
     // Start the writer loop
     while ((next_result = claim_result(task_manager)) != NULL) {

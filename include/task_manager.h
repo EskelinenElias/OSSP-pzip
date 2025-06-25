@@ -9,11 +9,6 @@
 #include "../include/task.h"
 #include "../include/result.h"
 
-typedef struct {
-    int completed;  
-    result_t* result; 
-} task_result_t;
-
 // Task manager
 typedef struct {
     pthread_mutex_t* lock; 
@@ -24,7 +19,6 @@ typedef struct {
     pthread_cond_t* tasks_completed; 
     pthread_cond_t* tasks_available;
     pthread_cond_t* results_available;
-    int* completed;
     task_t** tasks; 
     result_t** results; 
 } task_manager_t;
@@ -39,10 +33,10 @@ int yield_task(task_manager_t* manager, char* data, size_t length);
 task_t* claim_task(task_manager_t* manager); 
 
 // Function to yield results to the manager
-int yield_result(task_manager_t* manager, task_t* task, result_t* result);
+int yield_result(task_manager_t* manager, result_t* result, result_data_t* result_data);
 
 // Function to claim a result from the manager
-result_t* claim_result(task_manager_t* manager);
+result_data_t* claim_result(task_manager_t* manager);
 
 // Function to wait for all tasks to complete
 int wait_for_completion(task_manager_t* manager);

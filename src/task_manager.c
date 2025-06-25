@@ -12,7 +12,7 @@ task_manager_t* init_manager(size_t capacity) {
     }
     
     // Initialize task manager and check for errors
-    task_manager_t* manager = malloc(sizeof(task_manager_t)); 
+    task_manager_t* manager = (task_manager_t*)malloc(sizeof(task_manager_t)); 
     if (!manager) {
         
         // Error; failed to allocate memory for task manager
@@ -31,8 +31,7 @@ task_manager_t* init_manager(size_t capacity) {
     manager->capacity = capacity; 
     
     // Allocate memory for an array of tasks 
-    manager->tasks = malloc(sizeof(task_t*) * capacity);
-    if (!manager->tasks) {
+    if (!(manager->tasks = (task_t**)malloc(sizeof(task_t*) * capacity))) {
         
         // Error; failed to allocate memory for tasks array
         fprintf(stderr, "Error: Failed to allocate memory for task manager tasks array\n");
@@ -41,21 +40,10 @@ task_manager_t* init_manager(size_t capacity) {
     }
     
     // Allocate memory for an array of results 
-    manager->results = malloc(sizeof(result_t*) * capacity);
-    if (!manager->results) {
+    if (!(manager->results = (result_t**)malloc(sizeof(result_t*) * capacity))) {
         
         // Error; failed to allocate memory for tasks array
         fprintf(stderr, "Error: Failed to allocate memory for task manager results array\n");
-        free_manager(manager);
-        return NULL;
-    }
-    
-    // Allocate memory for an array of statuses 
-    manager->completed = malloc(sizeof(int) * capacity);
-    if (!manager->completed) {
-        
-        // Error; failed to allocate memory for tasks array
-        fprintf(stderr, "Error: Failed to allocate memory for task manager completed array\n");
         free_manager(manager);
         return NULL;
     }
@@ -145,13 +133,13 @@ task_manager_t* init_manager(size_t capacity) {
 }
 
 // Function for yielding a task to the manager (by main thread)
-int yield_task(task_manager_t* manager, char* data, size_t length) {
+int yield_task(task_manager_t* manager, char* data, size_t size) {
     
     // Input validation
-    if (!manager) { // Empty tasks (data = NULL, length = 0) are allowed, as they act as EOF
+    if (!manager) { // Empty tasks (task_data = NULL, task_size = 0) are allowed, as they act as EOF
         
         // Invalid input
-        fprintf(stderr, "Error: Manager is NULL\n");
+        fprintf(stderr, "Failed to yield task: Invalid input\n");
         return ERROR;
     }
     
@@ -159,7 +147,7 @@ int yield_task(task_manager_t* manager, char* data, size_t length) {
     if (pthread_mutex_lock(manager->lock) != 0) {
         
         // Failed to acquire lock
-        fprintf(stderr, "Error: Failed to acquire lock\n");
+        fprintf(stderr, "Failed to yield task: Failed to acquire lock\n");
         return ERROR;
     }
     
@@ -170,24 +158,32 @@ int yield_task(task_manager_t* manager, char* data, size_t length) {
         if (pthread_cond_wait(manager->room_available, manager->lock) != 0) {
             
             // Failed to wait for signal 
-            fprintf(stderr, "Error: Failed to wait for room available signal\n");
+            fprintf(stderr, "Failed to yield task: Failed to wait for room\n");
             return ERROR;
         }
     }
+    
+    // Initialize the corresponding result
+    result_t* result = init_result(PENDING);
+    if (!result) {
         
-    // Create a new task and check for errors
-    task_t* task = init_task(data, length, &manager->results[manager->rear], &manager->completed[manager->rear]);
+        // Failed to initialize result
+        fprintf(stderr, "Failed to yield task: Failed to initialize result\n");
+        return ERROR;
+    }
+    
+    // Initialize a new task and check for errors
+    task_t* task = init_task(data, size, &result);
     if (!task) {
         
         // Failed to initialize task
-        fprintf(stderr, "Error: Failed to initialize task\n");
-        return ERROR; 
+        fprintf(stderr, "Failed to yield task: Failed to initialize task\n");
+        return ERROR;
     }
     
-    // Add task to the manager's task list
+    // Add the task and result to the manager
     manager->tasks[manager->rear] = task;
-    manager->completed[manager->rear] = FALSE; 
-    manager->results[manager->rear] = NULL; 
+    manager->results[manager->rear] = result;
     
     // Increment number of available tasks and size and update rear index
     manager->num_available_tasks++; 
@@ -241,10 +237,13 @@ task_t* claim_task(task_manager_t* manager) {
     }
     
     // Claim a task from the manager and check if it's valid
-    task_t* task = manager->tasks[manager->next_task_index]; // NULL pointer represents a termination signal
+    task_t* task = &manager->tasks[manager->next_task_index]; // NULL pointer represents a termination signal
+    
+    // Check for termination task 
+    if (!task->result) return NULL;
     
     // Set the tasks array slot to NULL (to avoid dangling pointers)
-    manager->tasks[manager->next_task_index] = NULL;
+    // manager->tasks[manager->next_task_index] = NULL;
     
     // Increment next task index and decrement number of available tasks
     manager->next_task_index = (manager->next_task_index + 1) % manager->capacity;
@@ -275,13 +274,13 @@ task_t* claim_task(task_manager_t* manager) {
 }
 
 // Function to yield the result of a task to the manager (by a worker)
-int yield_result(task_manager_t* manager, task_t* task, result_t* result) {
+int yield_result(task_manager_t* manager, result_t* result, result_data_t* result_data) {
     
     // Input validation
-    if (!manager || !task || !result) {
+    if (!manager || !result || !result_data) {
         
         // Invalid input
-        fprintf(stderr, "Error: Invalid input\n");
+        fprintf(stderr, "Failed to yield result: Invalid input %p %p %p\n", manager, result, result_data);
         return ERROR; 
     } 
     
@@ -289,22 +288,24 @@ int yield_result(task_manager_t* manager, task_t* task, result_t* result) {
     if (pthread_mutex_lock(manager->lock) != 0) {
         
         // Failed to acquire lock
-        fprintf(stderr, "Error: Failed to acquire lock\n");
+        fprintf(stderr, "Failed to yield result: Failed to acquire lock\n");
         return ERROR;
     }
     
     // Add the result to the managers results array
-    *task->result = result;
-    *task->status = TRUE; 
+    result->data = result_data;
+    result->status = COMPLETED; 
+    
+    // Increment the number of available results
     manager->num_available_results++;
     
     // Free the memory allocated for the task 
-    if (free_task(task) != SUCCESS) {
+    // if (free_task(task) != SUCCESS) {
         
-        // Failed to free task
-        fprintf(stderr, "Error: Failed to free task\n");
-        return ERROR;
-    }
+    //     // Failed to free task
+    //     fprintf(stderr, "Error: Failed to free task\n");
+    //     return ERROR;
+    // }
     
     // Signal main thread that results are available
     if (pthread_cond_signal(manager->results_available) != 0) {
@@ -327,13 +328,13 @@ int yield_result(task_manager_t* manager, task_t* task, result_t* result) {
 }
 
 // Function to claim a result from the task manager (in order)
-result_t* claim_result(task_manager_t* manager) {
+result_data_t* claim_result(task_manager_t* manager) {
         
     // Input validation
     if (!manager) {
         
         // Invalid input
-        fprintf(stderr, "Error: Invalid input\n");
+        fprintf(stderr, "Failed to claim result: Invalid input\n");
         return NULL;
     }
     
@@ -341,22 +342,22 @@ result_t* claim_result(task_manager_t* manager) {
     if (pthread_mutex_lock(manager->lock) != 0) {
         
         // Failed to acquire lock
-        fprintf(stderr, "Error: Failed to acquire lock\n");
+        fprintf(stderr, "Failed to claim result: Failed to acquire lock\n");
         return NULL;
     }
     
     // Check if the next result is available
-    while (!(manager->completed[manager->next_result_index])) {
+    while (manager->results[manager->next_result_index].status != COMPLETED) {
                 
         // Wait for the next result to become available
         pthread_cond_wait(manager->results_available, manager->lock);
     }
             
     // Claim a result from the manager and check that it's valid
-    result_t* result = manager->results[manager->next_result_index];
+    result_t result = manager->results[manager->next_result_index];
     
     // Set the result array slot to NULL 
-    manager->results[manager->next_result_index] = NULL;
+    // manager->results[manager->next_result_index] = NULL;
     
     // Increment next result index and decrement current size
     manager->next_result_index = (manager->next_result_index + 1) % manager->capacity;
@@ -364,11 +365,14 @@ result_t* claim_result(task_manager_t* manager) {
     manager->front = (manager->front + 1) % manager->capacity;
     manager->size--; 
     
+    // Check if the result is the termination result
+    if (!result.data) return NULL; 
+    
     // Signal that the task manager has room available
     if (pthread_cond_signal(manager->room_available) != 0) {
         
         // Failed to signal room available
-        fprintf(stderr, "Error: Failed to signal room available\n");
+        fprintf(stderr, "Failed to claim result: Failed to signal room available\n");
         return NULL;
     }
     
@@ -379,7 +383,7 @@ result_t* claim_result(task_manager_t* manager) {
         if (pthread_cond_signal(manager->tasks_completed) != 0) {
             
             // Failed to signal all tasks completed
-            fprintf(stderr, "Error: Failed to signal all tasks completed\n");
+            fprintf(stderr, "Failed to claim result: Failed to signal all tasks completed\n");
             return NULL;
         }
     }
@@ -388,12 +392,12 @@ result_t* claim_result(task_manager_t* manager) {
     if (pthread_mutex_unlock(manager->lock) != 0) {
         
         // Failed to release lock
-        fprintf(stderr, "Error: Failed to release lock\n");
+        fprintf(stderr, "Failed to claim result: Failed to release lock\n");
         return NULL;
     }
         
     // Return claimed result
-    return result;
+    return result.data;
 }
 
 // Function to yield a termination task to the manager
@@ -423,9 +427,13 @@ int yield_termination_task(task_manager_t* manager) {
     }
             
     // Add termination task to the manager's task list
-    manager->tasks[manager->rear] = NULL;
-    manager->results[manager->rear] = NULL; 
-    manager->completed[manager->rear] = TRUE; 
+    manager->tasks[manager->rear].data.data = NULL;
+    manager->tasks[manager->rear].data.size = 0;
+    manager->tasks[manager->rear].result = NULL;
+    
+    // Add termination result to the manager's result list
+    manager->results[manager->rear].data = NULL;
+    manager->results[manager->rear].status = COMPLETED;
     
     // Increment size, number of available tasks and results, and update rear index
     manager->size++;
@@ -461,40 +469,40 @@ int yield_termination_task(task_manager_t* manager) {
     return SUCCESS;
 }
 
-int force_termination(task_manager_t* manager) {
+// int force_termination(task_manager_t* manager) {
     
-    // Acquire the lock
-    if (pthread_mutex_lock(manager->lock) != 0) {
+//     // Acquire the lock
+//     if (pthread_mutex_lock(manager->lock) != 0) {
         
-        // Failed to acquire lock
-        fprintf(stderr, "Error: Failed to acquire lock\n");
-        return ERROR;
-    }
+//         // Failed to acquire lock
+//         fprintf(stderr, "Error: Failed to acquire lock\n");
+//         return ERROR;
+//     }
     
-    // Free all tasks and set them to NULL 
-    for (size_t t = 0; t < manager->capacity; t++) {
-        if (manager->tasks[t]) free_task(manager->tasks[t]); 
-        manager->tasks[t] = NULL;
-    }
+//     // Free all tasks and set them to NULL 
+//     for (size_t t = 0; t < manager->capacity; t++) {
+//         if (manager->tasks[t]) free_task(manager->tasks[t]); 
+//         manager->tasks[t] = NULL;
+//     }
     
-    // Signal to the workers that a task is available
-    if (pthread_cond_signal(manager->tasks_available) != 0) {
+//     // Signal to the workers that a task is available
+//     if (pthread_cond_signal(manager->tasks_available) != 0) {
         
-        // Failed to signal condition variable
-        fprintf(stderr, "Error: Failed to signal condition variable\n");
-    }
+//         // Failed to signal condition variable
+//         fprintf(stderr, "Error: Failed to signal condition variable\n");
+//     }
         
-    // Release the lock
-    if (pthread_mutex_unlock(manager->lock) != 0) {
+//     // Release the lock
+//     if (pthread_mutex_unlock(manager->lock) != 0) {
         
-        // Failed to release lock
-        fprintf(stderr, "Error: Failed to release lock\n");
-        return ERROR;
-    }
+//         // Failed to release lock
+//         fprintf(stderr, "Error: Failed to release lock\n");
+//         return ERROR;
+//     }
     
-    // Successfully added tasks
-    return SUCCESS;
-}
+//     // Successfully added tasks
+//     return SUCCESS;
+// }
 
 // Function to free the task manager
 void free_manager(task_manager_t* manager) {

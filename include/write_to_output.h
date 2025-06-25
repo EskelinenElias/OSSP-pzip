@@ -6,12 +6,12 @@
 #include <string.h>
 
 #include "../include/constants.h"
-#include "../include/result.h"
+#include "../include/result_data.h"
 
 // Function to write encoded data to standard output as bytes
-int write_encoded_data_to_output(result_t* data);
+int write_encoded_data_to_output(result_data_t* data);
 
 // Function to write encoded data to standard output as text (for testing purposes)
-int write_encoded_text_to_output(result_t* data); 
+int write_encoded_text_to_output(result_data_t* data); 
 
 #endif // WRITE_TO_OUTPUT_H
