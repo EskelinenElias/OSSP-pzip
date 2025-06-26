@@ -18,7 +18,7 @@ typedef struct {
 } result_t; 
 
 // Function to initialize a new result structure
-result_t* init_result(int status); 
+result_t* init_result(); 
 
 // Function to free a result structure
 void* free_result(result_t* result); 

@@ -15,11 +15,11 @@ typedef struct {
 
 typedef struct {
     task_data_t task_data;
-    result_t** result;
+    result_t* result;
 } task_t;
 
 // Function to initialize a task
-task_t* init_task(char* data, size_t size, result_t** result);
+task_t* init_task(char* data, size_t size, result_t* result);
 
 // Function to free the memory allocated for an encoding task structure
 void* free_task(task_t* task);

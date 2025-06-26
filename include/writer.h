@@ -6,8 +6,8 @@
 
 #include "../include/constants.h"
 #include "../include/encode.h"
-#include "../include/task_data.h"
-#include "../include/result_data.h"
+#include "../include/task.h"
+#include "../include/result.h"
 #include "../include/file_manager.h"
 #include "../include/task_manager.h"
 #include "../include/write_to_output.h"
@@ -26,6 +26,6 @@ pthread_t* init_writer(file_manager_t* file_manager, task_manager_t* task_manage
 
 // int terminate_writer(pthread_t *threads, size_t num_workers, task_manager_t *queue);
 
-void* terminate_writer(pthread_t* writer); 
+void* terminate_writer(pthread_t* writer, task_manager_t* task_manager); 
 
 #endif // WRITER_H

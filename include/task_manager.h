@@ -12,13 +12,13 @@
 // Task manager
 typedef struct {
     pthread_mutex_t* lock; 
-    size_t front, rear, size, capacity; 
-    size_t num_available_tasks, num_available_results;
-    size_t next_task_index, next_result_index;
+    size_t rear, size, capacity; 
+    size_t next_task_index, next_result_index; 
+    size_t num_available_tasks; 
     pthread_cond_t* room_available; 
     pthread_cond_t* tasks_completed; 
     pthread_cond_t* tasks_available;
-    pthread_cond_t* results_available;
+    pthread_cond_t* next_result_available;
     task_t** tasks; 
     result_t** results; 
 } task_manager_t;
@@ -45,7 +45,7 @@ int wait_for_completion(task_manager_t* manager);
 int yield_termination_task(task_manager_t* manager); 
 
 // Function to free memory allocated to task manager and destroy mutex lock and condition variables
-void free_manager(task_manager_t* manager);
+void* free_manager(task_manager_t* manager);
 
 int force_termination(task_manager_t* manager); 
 

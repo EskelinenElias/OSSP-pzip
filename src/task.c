@@ -1,6 +1,6 @@
 #include "../include/task.h"
 
-task_t* init_task(char* data, size_t size, result_t** result) {
+task_t* init_task(char* data, size_t size, result_t* result) {
     
     // Allocate memory for task
     task_t* task = malloc(sizeof(task_t));

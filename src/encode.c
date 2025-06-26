@@ -4,12 +4,18 @@
 result_data_t* encode(task_data_t* task_data) {
     
     // Input validation 
-    if (!task_data || (task_data->data == NULL && task_data->size > 0)) {
+    if (!task_data || (task_data->data == NULL && task_data->size > 0) || task_data->size < 0 || (task_data->data != NULL && task_data->size == 0)) {
         
         // Invalid input
         fprintf(stderr, "Failed to encode data. Invalid input\n");
         return NULL; 
     }
+    
+    // Allocate memory for the result data structure
+    result_data_t* result_data = init_result_data(task_data->size);
+    
+    // If the input is empty (indicating EOF), return empty result data
+    if (task_data->size == 0) return result_data;
     
     // Initialize the tracked character to the first character of the input and set count to 1
     char tracked_char = task_data->data[0];
@@ -35,7 +41,7 @@ result_data_t* encode(task_data_t* task_data) {
                     
                     // Handle failure to increase capacity
                     fprintf(stderr, "Failed to encode data. Failed to increase capacity\n");
-                    return ERROR;
+                    return NULL;
                 }
             }
             
@@ -60,7 +66,7 @@ result_data_t* encode(task_data_t* task_data) {
             
             // Handle failure to increase capacity
             fprintf(stderr, "Failed to encode data. Failed to increase capacity\n");
-            return ERROR;
+            return NULL;
         }
     }
 
@@ -75,7 +81,7 @@ result_data_t* encode(task_data_t* task_data) {
     reallocate_result_data(result_data, index); 
     
     // Successfully encoded data
-    return SUCCESS; 
+    return result_data; 
 }
 
 // Function to handle the boundary on subsequent results 

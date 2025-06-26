@@ -1,20 +1,20 @@
 #include "../include/result.h"
 
 // Function to initialize a new result structure
-result_t* init_result(int status) {
+result_t* init_result() {
     
     // Allocate memory for the result structure
     result_t* result = (result_t*)malloc(sizeof(result_t));
     if (!result) {
         
         // Failed to allocate memory
-        fprintf(stderr, "Failed to allocate memory for result\n");
+        fprintf(stderr, "Failed to initialize result: failed to allocate memory for result\n");
         return NULL;
     }    
     
     // Set result fields
     result->data = NULL; 
-    result->status = status; 
+    result->status = PENDING; 
     
     // Successfully created result structure
     return result; 
@@ -27,12 +27,12 @@ void* free_result(result_t* result) {
     if (!result) {
         
         // Invalid input
-        fprintf(stderr, "Failed to free result: Invalid input\n");
+        fprintf(stderr, "Failed to free result: invalid input\n");
         return NULL;
     }
     
     // Free result data structure
-    free_result_data(result->data);
+    if (result->data) free_result_data(result->data);
     
     // Free result structure
     free(result);
@@ -49,7 +49,7 @@ result_data_t* init_result_data(size_t initial_capacity) {
     if (!result) {
         
         // Failed to allocate memory
-        fprintf(stderr, "Failed to allocate memory for result\n");
+        fprintf(stderr, "Failed to initialize result data: failed to allocate memory for result\n");
         return NULL;
     }    
     
@@ -66,7 +66,7 @@ result_data_t* init_result_data(size_t initial_capacity) {
     if (!result->characters) {
         
         // Failed to allocate memory
-        fprintf(stderr, "Failed to allocate memory for characters\n");
+        fprintf(stderr, "Failed to initialize result data: failed to allocate memory for characters\n");
         free(result);
         return NULL;
     }
@@ -76,7 +76,7 @@ result_data_t* init_result_data(size_t initial_capacity) {
     if (!result->counts) {
         
         // Failed to allocate memory
-        fprintf(stderr, "Failed to allocate memory for counts\n");
+        fprintf(stderr, "Failed to initialize result data: failed to allocate memory for counts\n");
         free(result->characters);
         free(result);
         return NULL;
@@ -93,7 +93,7 @@ int reallocate_result_data(result_data_t* result, size_t new_capacity) {
     if (result == NULL || new_capacity < 1) {
         
         // Invalid input
-        fprintf(stderr, "Failed to reallocate memory for result. Invalid input\n"); 
+        fprintf(stderr, "Failed to reallocate memory for result data: invalid input\n"); 
         return ERROR; 
     }
     
@@ -102,7 +102,7 @@ int reallocate_result_data(result_data_t* result, size_t new_capacity) {
     if (!new_characters) {
         
         // Failed to reallocate memory for characters
-        fprintf(stderr, "Failed to reallocate memory for result characters\n"); 
+        fprintf(stderr, "Failed to reallocate memory for result data: failed to reallocate memory for characters\n"); 
         return ERROR; 
     }
     
@@ -111,7 +111,7 @@ int reallocate_result_data(result_data_t* result, size_t new_capacity) {
     if (!new_counts) {
         
         // Failed to reallocate memory for counts
-        fprintf(stderr, "Failed to reallocate memory for result counts\n"); 
+        fprintf(stderr, "Failed to reallocate memory for result data: failed to reallocate memory for counts\n"); 
         free(new_characters);
         return ERROR; 
     }
@@ -132,7 +132,7 @@ void* free_result_data(result_data_t* result) {
     if (!result) {
         
         // Invalid input
-        fprintf(stderr, "Cannot free result, result is NULL\n"); 
+        fprintf(stderr, "Failed to free result data: invalid input\n"); 
         return NULL; 
     }
         
@@ -145,41 +145,6 @@ void* free_result_data(result_data_t* result) {
     // Free the data structure
     free(result); 
     
-    // Set the pointer to NULL to avoid dangling pointer
-    result = NULL;
-    
     // Successfully freed result
     return NULL; 
 }
-
-// // Function to write to the RLE data array and dynamically reallocate memory if necessary
-// int append_to_encoded_data(result_t* result, char character, size_t count) {
-    
-//     // Input validation 
-//     if (!result) {
-        
-//         // Invalid input
-//         fprintf(stderr, "Failed to append to result. Invalid input\n");
-//         return ERROR; // Error
-//     }
-
-//     // Reallocate memory if necessary 
-//     if (result->capacity >= encoded_data->capacity) {
-//         size_t new_capacity = encoded_data->capacity + INIT_CAPACITY; 
-//         if (realloc_encoded_data(encoded_data, new_capacity) != SUCCESS) {
-//             fprintf(stderr, "write_to_encoded_data_dynamically: Failed to reallocate memory!\n");
-//             // Check if memory was deallocated successfully
-//             if (encoded_data->characters != NULL || encoded_data->counts != NULL) {
-//                 free_encoded_data(encoded_data);
-//             }
-//             return FAILURE; // Error
-//         }
-//     }
-    
-//     // Write character count to current index
-//     size_t index = encoded_data->size; 
-//     encoded_data->characters[index] = character; 
-//     encoded_data->counts[index] = count; 
-//     encoded_data->size++; // Increase size
-//     return SUCCESS; // Success
-// }

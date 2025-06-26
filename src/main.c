@@ -1,4 +1,5 @@
 #include "../include/main.h"
+#include <pthread.h>
 
 // Function to initialize process variables
 process_vars_t* init_process(size_t num_workers, size_t num_files) {
@@ -67,13 +68,18 @@ process_vars_t* init_process(size_t num_workers, size_t num_files) {
 process_vars_t* free_process(process_vars_t* process) {
         
     // Terminate workers 
-    if (process->workers && process->num_workers > 0) {
-        terminate_workers(process->workers, process->num_workers, process->task_manager);
+    for (size_t i = 0; i < process->num_workers; i++) {
+        yield_termination_task(process->task_manager);
+    }
+        
+    // Wait for all threads to complete
+    for (size_t i = 0; i < process->num_workers; i++) {
+        pthread_join(process->workers[i], NULL);
     }
     
-    // Terminate writer
-    if (process->writer) terminate_writer(process->writer);
-            
+    // Wait for writer to complete
+    terminate_writer(process->writer, process->task_manager);
+
     // Free task manager
     if (process->task_manager) free_manager(process->task_manager);
     
@@ -100,20 +106,20 @@ int main(int argc, char *argv[]) {
     size_t num_cores = get_num_cores();
     size_t num_files = argc - 1; 
     process_vars_t* process = init_process(num_cores, num_files); 
-        
+            
     // Encode the files and write encoded data to output
     for (size_t i = 0; i < num_files; i++) {
-                
+                        
         // Map a new file to memory
         mapped_file_t* current_file = map_next_file(process->file_manager, argv[i + 1]); 
         if (!current_file) {
             
             // Failed to map file 
-            fprintf(stderr, "Failed to map file to memory"); 
+            fprintf(stderr, "Failed to map file to memory\n"); 
             free_process(process); 
             return ERROR; 
         }
-                
+                        
         // Yield tasks to task task_manager until end of file is reached
         for (size_t t = 0; t < current_file->size; t += TASK_SIZE) {
             
@@ -130,7 +136,7 @@ int main(int argc, char *argv[]) {
                 return ERROR; 
             }
         }
-                                
+                                        
         // Yield an end of file task to task task_manager
         if (yield_task(process->task_manager, NULL, 0) != SUCCESS) {
             
@@ -141,9 +147,6 @@ int main(int argc, char *argv[]) {
         }
     }
         
-    // Wait for all tasks to complete
-    wait_for_completion(process->task_manager); 
-    
     // Cleanup routine
     free_process(process);
     

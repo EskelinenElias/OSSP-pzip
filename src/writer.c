@@ -4,7 +4,7 @@
 pthread_t* init_writer(file_manager_t* file_manager, task_manager_t* task_manager) {
     
     // Allocate memory for writer thread and check for errors
-    pthread_t* writer_thread = malloc(sizeof(pthread_t));
+    pthread_t* writer_thread = (pthread_t*)malloc(sizeof(pthread_t));
     if (!writer_thread) {
         
         // Failed to allocate memory for writer thread
@@ -60,65 +60,72 @@ void* writer(void* args) {
     }
     
     // Initialize variables
-    result_data_t* current_result = NULL; 
-    result_data_t* next_result = NULL; 
+    result_data_t* current_result_data = NULL; 
+    result_data_t* next_result_data = NULL; 
         
     // Start the writer loop
-    while ((next_result = claim_result(task_manager)) != NULL) {
+    while ((next_result_data = claim_result(task_manager))) {
                 
         // Check if the next result is empty
-        if (next_result->capacity == 0) {
+        if (next_result_data->capacity == 0) {
             
             // Unmap the file from memory
             unmap_next_file(file_manager);
             
             // Skip empty result
-            free_result(next_result);
+            if (next_result_data) free_result_data(next_result_data);
             continue;
         }
         
         // Check if the current result can be written to output
-        if (current_result && current_result->capacity > 0) {
+        if (current_result_data && current_result_data->capacity > 0) {
                             
             // Handle the boundary between the current result and the next result
-            handle_boundary(current_result, next_result); 
+            if (handle_boundary(current_result_data, next_result_data) != SUCCESS) {
+                
+                // Failed to handle boundary
+                fprintf(stderr, "Failed to write result to output: error handling boundary\n");
+                if (current_result_data) free_result_data(current_result_data);
+                if (next_result_data) free_result_data(next_result_data);
+                return NULL; 
+            } 
                                     
             // Write the current result to output and check for errors
-            if (write_encoded_data_to_output(current_result) != SUCCESS) {
+            if (write_encoded_data_to_output(current_result_data) != SUCCESS) {
                 
                 // Failed to write result to output
-                fprintf(stderr, "Error writing result to output\n");
-                if (current_result) free_result(current_result);
-                if (next_result) free_result(next_result);
+                fprintf(stderr, "Failed to write result to output: error writing result to output\n");
+                if (current_result_data) free_result_data(current_result_data);
+                if (next_result_data) free_result_data(next_result_data);
                 return NULL; 
             }       
                   
             // Free the current result        
-            free_result(current_result);
-            current_result = NULL;
+            if (current_result_data) free_result_data(current_result_data);
+            current_result_data = NULL;
         }
     
         // Swap the next result to the current result
-        current_result = next_result;
-        next_result = NULL; 
+        current_result_data = next_result_data;
+        next_result_data = NULL; 
     }    
         
     // Check if there is a current result and it has data to write
-    if (current_result && current_result->capacity > 0) {
+    if (current_result_data && current_result_data->capacity > 0) {
         
         // Write the last result to output and check for errors
-        if (write_encoded_data_to_output(current_result) != SUCCESS) {
+        if (write_encoded_data_to_output(current_result_data) != SUCCESS) {
             
             // Failed to write result to output
             fprintf(stderr, "Error writing result to output\n");
-            if (current_result) free_result(current_result);
-            if (next_result) free_result(next_result);
+            if (current_result_data) free_result_data(current_result_data);
+            if (next_result_data) free_result_data(next_result_data);
             return NULL; 
         }     
         
         // Free the last result
-        free_result(current_result);
-        current_result = NULL;
+        if (current_result_data) free_result_data(current_result_data);
+        current_result_data = NULL;
     }
     
     // Successfully completed writing all results to output stream
@@ -126,7 +133,21 @@ void* writer(void* args) {
 }
 
 // Function to terminate writer thread
-void* terminate_writer(pthread_t* writer) {
+void* terminate_writer(pthread_t* writer, task_manager_t* task_manager) {
+    
+    // Input validation
+    if (!writer) {
+        
+        // Invalid input
+        fprintf(stderr, "Failed to terminate writer: invalid input\n");
+        return NULL;
+    }
+    
+    // Yield a termination task 
+    yield_termination_task(task_manager); 
+    
+    // Join the writer thread
     pthread_join(*writer, NULL);
+    
     return NULL; 
 }

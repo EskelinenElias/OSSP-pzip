@@ -1,6 +1,6 @@
 # Compiler and flags
 CC = gcc
-CFLAGS = -Wall -Werror -Iinclude -O # Added -Iinclude for header files
+CFLAGS = -g -Wall -Werror -Iinclude
 LDFLAGS = -lpthread # Link against pthread and math libraries
 
 # Directories

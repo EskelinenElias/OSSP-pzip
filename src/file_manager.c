@@ -140,20 +140,12 @@ mapped_file_t* map_next_file(file_manager_t* file_manager, const char *filepath)
         fprintf(stderr, "Failed to map file. Invalid input\n");
         return NULL;
     }
-    
+        
     // Check that the file manager has room 
     if (file_manager->num_mapped_files == file_manager->capacity) {
         
         // File manager is full
-        fprintf(stderr, "Failed to map file. File manager is full");
-        return NULL;
-    }
-    
-    // Check if the file exists
-    if (access(filepath, F_OK) == -1) {
-        
-        // File does not exist
-        fprintf(stderr, "Failed to map file. File does not exist");
+        fprintf(stderr, "Failed to map file. File manager is full\n");
         return NULL;
     }
             
@@ -183,7 +175,21 @@ mapped_file_t* map_next_file(file_manager_t* file_manager, const char *filepath)
             return already_mapped_file;
         }
     }
-    
+        
+    // Check if the file exists
+    if (access(filepath, F_OK) == -1) {
+        
+        // File does not exist
+        fprintf(stderr, "Failed to map file. File does not exist\n");
+        return NULL;
+        
+    } else if (access(filepath, R_OK) == -1) {
+        
+        // File is not readable
+        fprintf(stderr, "Failed to map file. File is not readable\n");
+        return NULL;
+    }
+
     // Open file and check for errors
     int file; 
     if ((file = open(filepath, 'r')) == -1) {
@@ -192,7 +198,7 @@ mapped_file_t* map_next_file(file_manager_t* file_manager, const char *filepath)
         fprintf(stderr, "Failed to map file. Failed to open file\n");
         return NULL;
     }
-    
+        
     // File has not been mapped; get pointer to the next mapped file slot
     mapped_file_t* next_mapped_file = &file_manager->mapped_files[file_manager->num_mapped_files];
     file_manager->num_mapped_files++;
