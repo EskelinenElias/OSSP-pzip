@@ -7,14 +7,16 @@
 #include <math.h>
 
 #include "../include/constants.h"
-#include "../include/task_manager.h"
-#include "../include/worker.h"
-#include "../include/writer.h"
+#include "../include/file_manager/file_manager.h"
+#include "../include/task_manager/init_task_manager.h"
+#include "../include/task_manager/yield_task_data.h"
+#include "../include/worker/init_worker.h"
+#include "../include/writer/writer.h"
 
 typedef struct {
     file_manager_t* file_manager;
     task_manager_t* task_manager;
-    pthread_t* workers;
+    pthread_t** workers;
     size_t num_workers;
     pthread_t* writer; 
 } process_vars_t;

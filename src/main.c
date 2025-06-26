@@ -1,23 +1,23 @@
 #include "../include/main.h"
-#include <pthread.h>
+#include <stdio.h>
 
 // Function to initialize process variables
-process_vars_t* init_process(size_t num_workers, size_t num_files) {
+process_vars_t* init_process(size_t num_cores, size_t num_files) {
         
     // Input validation
-    if (num_workers < 1 || num_files < 1) {
+    if (num_cores < 1 || num_files < 1) {
         
         // Invalid input
-        fprintf(stderr, "Failed to initialize process, invalid input"); 
+        fprintf(stderr, "Failed to initialize process, invalid input\n"); 
         return NULL;
     }
     
     // Allocate memory for process variables and check for errors
-    process_vars_t* process = malloc(sizeof(process_vars_t));
+    process_vars_t* process = (process_vars_t*)malloc(sizeof(process_vars_t));
     if (!process) {
         
         // Failed to allocate memory for process
-        fprintf(stderr, "Failed to initialize process, failed to allocate memory");
+        fprintf(stderr, "Failed to initialize process, failed to allocate memory\n");
         return NULL;
     }
     
@@ -25,38 +25,56 @@ process_vars_t* init_process(size_t num_workers, size_t num_files) {
     process->file_manager = NULL; 
     process->task_manager = NULL;
     process->workers = NULL; 
-    process->num_workers = num_workers; 
+    process->num_workers = num_cores - 1 ; 
     process->writer = NULL;
     
     // Initialize file manager and check for errors
     if (!(process->file_manager = init_file_manager(num_files))) {
         
         // Failed to initialize file manager
-        fprintf(stderr, "Failed to initialize file manager");
-        return NULL; 
+        fprintf(stderr, "Failed to initialize process: failed to initialize file manager\n");
+        return free_process(process); ; 
     }
     
     // Initialize a task task_manager and check for errors
-    if (!(process->task_manager = init_manager(MAX_CAPACITY))) {
+    if (!(process->task_manager = init_task_manager(MAX_CAPACITY))) {
         
         // Failed to initialize task task_manager
-         fprintf(stderr, "Failed to initialize task task_manager");
-        return NULL; 
+        fprintf(stderr, "Failed to initialize process: failed to initialize task manager\n");
+        return free_process(process); ; 
+    }
+    
+    if (!process->task_manager->lock) {
+        
+        fprintf(stderr, "Failed to initialize process: failed to initialize task manager lock\n");
+        return free_process(process); 
+    }
+    
+    // Allocate memory for workers and check for errors
+    if (!(process->workers = (pthread_t**)malloc(sizeof(pthread_t*) * process->num_workers))) {
+        
+        // Failed to allocate memory for workers
+        fprintf(stderr, "Failed to initialize process: failed to allocate memory for workers\n");
+        return free_process(process); ; 
     }
     
     // Initialize workers and check for errors
-    if (!(process->workers = init_workers(process->num_workers, process->task_manager))) { 
+    for (size_t i = 0; i < process->num_workers; i++) {
         
-        // Failed to initialize workers
-        fprintf(stderr, "Failed to initialize workers"); 
-        return NULL; 
+        // Initialize a worker and check for errors
+        if (!(process->workers[i] = init_worker(process->task_manager))) {
+            
+            // Failed to initialize worker
+            fprintf(stderr, "Failed to initialize process: failed to initialize worker %zu\n", i);
+            return free_process(process); ; 
+        }
     }
     
     // Initialize writer and check for errors
     if (!(process->writer = init_writer(process->file_manager, process->task_manager))) {
         
         // Failed to initialize writer
-        fprintf(stderr, "Failed to initialize writer");
+        fprintf(stderr, "Failed to initialize process: failed to initialize writer\n");
         return NULL; 
     }
         
@@ -67,19 +85,30 @@ process_vars_t* init_process(size_t num_workers, size_t num_files) {
 // Function to free process variables
 process_vars_t* free_process(process_vars_t* process) {
         
-    // Terminate workers 
+    // Send termination signals
     for (size_t i = 0; i < process->num_workers; i++) {
-        yield_termination_task(process->task_manager);
+        send_termination_signal(process->task_manager);
     }
         
     // Wait for all threads to complete
-    for (size_t i = 0; i < process->num_workers; i++) {
-        pthread_join(process->workers[i], NULL);
+    if (process->workers) {
+        for (size_t i = 0; i < process->num_workers; i++) {
+            
+            // Check if the worker still exists
+            if (process->workers[i]) {
+                
+                // Wait for worker to complete
+                pthread_join(*process->workers[i], NULL);
+                
+                // Set the worker to NULL
+                process->workers[i] = NULL;
+            }
+        }
     }
     
     // Wait for writer to complete
-    terminate_writer(process->writer, process->task_manager);
-
+    if (process->writer) pthread_join(*process->writer, NULL);
+    
     // Free task manager
     if (process->task_manager) free_manager(process->task_manager);
     
@@ -106,7 +135,8 @@ int main(int argc, char *argv[]) {
     size_t num_cores = get_num_cores();
     size_t num_files = argc - 1; 
     process_vars_t* process = init_process(num_cores, num_files); 
-            
+    if (!process) return ERROR; 
+                
     // Encode the files and write encoded data to output
     for (size_t i = 0; i < num_files; i++) {
                         
@@ -128,7 +158,7 @@ int main(int argc, char *argv[]) {
             size_t task_size = fmin(TASK_SIZE, current_file->size - t); 
             
             // Yield task to task task_manager
-            if (yield_task(process->task_manager, task_data, task_size) != SUCCESS) {
+            if (yield_task_data(process->task_manager, task_data, task_size) != SUCCESS) {
                 
                 // Failed to yield task to task task_manager
                 fprintf(stderr, "Failed to yield task to task task_manager\n");
@@ -138,7 +168,7 @@ int main(int argc, char *argv[]) {
         }
                                         
         // Yield an end of file task to task task_manager
-        if (yield_task(process->task_manager, NULL, 0) != SUCCESS) {
+        if (yield_task_data(process->task_manager, NULL, 0) != SUCCESS) {
             
             // Failed to yield EOF task to task task_manager
             fprintf(stderr, "Failed to yield task to task task_manager\n");

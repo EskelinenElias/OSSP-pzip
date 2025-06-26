@@ -1,39 +1,44 @@
 # Compiler and flags
 CC = gcc
 CFLAGS = -g -Wall -Werror -Iinclude
-LDFLAGS = -lpthread # Link against pthread and math libraries
+LDFLAGS = -lpthread
 
 # Directories
 SRCDIR = src
 OBJDIR = obj
-BINDIR = .  #  Executable in the project root
 
 # Executable name
 TARGET = wzip
 
-# Source files
-SOURCES = $(wildcard $(SRCDIR)/*.c)
+# Find all source files recursively
+SOURCES := $(shell find $(SRCDIR) -name '*.c')
 
-# Object files
-OBJECTS = $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
+# Create object file paths, preserving directory structure
+OBJECTS := $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
+
+# Get all unique directories that need to be created in OBJDIR
+OBJDIRS := $(sort $(dir $(OBJECTS)))
 
 # Default target
 all: $(TARGET)
 
-# Create object directory if it doesn't exist
-$(OBJDIR):
-	mkdir -p $(OBJDIR)
+# Create the executable
+$(TARGET): $(OBJECTS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-# Link the object files to create the executable
-$(TARGET): $(OBJDIR) $(OBJECTS)
-	$(CC) $(CFLAGS) -o $(TARGET) $(OBJECTS) $(LDFLAGS)
-
-# Compile source files into object files
+# Compile source files to object files
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Clean up object files and executable
+# Clean up
 clean:
 	rm -rf $(OBJDIR) $(TARGET)
 
-.PHONY: all clean
+# Debug target to show variables
+debug:
+	@echo "SOURCES: $(SOURCES)"
+	@echo "OBJECTS: $(OBJECTS)"
+	@echo "OBJDIRS: $(OBJDIRS)"
+
+.PHONY: all clean debug
