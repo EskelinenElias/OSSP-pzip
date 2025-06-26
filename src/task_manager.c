@@ -21,43 +21,43 @@ task_manager_t* init_manager(size_t capacity) {
     }    
 
     // Set manager fields
-    manager->next_task_index = 0;
-    manager->next_result_index = 0; 
+    manager->tasks_front = 0;
+    manager->results_front = 0; 
     manager->rear = 0;
     manager->size = 0;
     manager->num_available_tasks = 0; 
     manager->capacity = capacity; 
     
-    // Allocate memory for an array of tasks 
-    if (!(manager->tasks = (task_t**)malloc(sizeof(task_t*) * capacity))) {
+    // Allocate memory for an array of tasks_queue 
+    if (!(manager->tasks_queue = (task_t**)malloc(sizeof(task_t*) * capacity))) {
         
-        // Error; failed to allocate memory for tasks array
-        fprintf(stderr, "Error: Failed to allocate memory for task manager tasks array\n");
+        // Error; failed to allocate memory for tasks_queue array
+        fprintf(stderr, "Error: Failed to allocate memory for task manager tasks_queue array\n");
         free_manager(manager);
         return NULL;
     }
     
-    // Allocate memory for an array of results 
-    if (!(manager->results = (result_t**)malloc(sizeof(result_t*) * capacity))) {
+    // Allocate memory for an array of results_queue 
+    if (!(manager->results_queue = (result_t**)malloc(sizeof(result_t*) * capacity))) {
         
-        // Error; failed to allocate memory for tasks array
-        fprintf(stderr, "Error: Failed to allocate memory for task manager results array\n");
+        // Error; failed to allocate memory for tasks_queue array
+        fprintf(stderr, "Error: Failed to allocate memory for task manager results_queue array\n");
         free_manager(manager);
         return NULL;
     }
     
-    // Initialize mutex lock for tasks and check for errors
+    // Initialize mutex lock for tasks_queue and check for errors
     if (!(manager->lock = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t)))) {
         
-        // Failed to allocate memory for tasks lock; perform cleanup routine and return
-        fprintf(stderr, "Error: Failed to allocate memory for task manager tasks lock\n");
+        // Failed to allocate memory for tasks_queue lock; perform cleanup routine and return
+        fprintf(stderr, "Error: Failed to allocate memory for task manager tasks_queue lock\n");
         free_manager(manager);
         return NULL;
         
     } else if (pthread_mutex_init(manager->lock, NULL) != 0) {
         
-        // Failed to initialize mutex lock for tasks; perform cleanup routine and return
-        fprintf(stderr, "Error: Failed to initialize mutex lock for tasks\n");
+        // Failed to initialize mutex lock for tasks_queue; perform cleanup routine and return
+        fprintf(stderr, "Error: Failed to initialize mutex lock for tasks_queue\n");
         free_manager(manager);
         return NULL; 
     };
@@ -78,50 +78,50 @@ task_manager_t* init_manager(size_t capacity) {
         return NULL; 
     }
     
-    // Initialize condition variable for signaling tasks are available and check for errors
+    // Initialize condition variable for signaling tasks_queue are available and check for errors
     if (!(manager->tasks_available = (pthread_cond_t*)malloc(sizeof(pthread_cond_t)))) {
         
-        // Failed to allocate memory for tasks available condition variable; perform cleanup routine and return
-        fprintf(stderr, "Error: Failed to allocate memory for tasks available condition variable\n");
+        // Failed to allocate memory for tasks_queue available condition variable; perform cleanup routine and return
+        fprintf(stderr, "Error: Failed to allocate memory for tasks_queue available condition variable\n");
         free_manager(manager);
         return NULL;
         
     } else if (pthread_cond_init(manager->tasks_available, NULL) != 0) { 
             
         // Error; free allocated memory and destroy mutex
-        fprintf(stderr, "Error: Failed to initialize condition variable for tasks available\n");
+        fprintf(stderr, "Error: Failed to initialize condition variable for tasks_queue available\n");
         free_manager(manager);
         return NULL; 
     }
     
-    // Initialize condition variable for signaling that results are available and check for errors
+    // Initialize condition variable for signaling that results_queue are available and check for errors
     if (!(manager->next_result_available = (pthread_cond_t*)malloc(sizeof(pthread_cond_t)))) {
         
-        // Failed to allocate memory for results available condition variable; perform cleanup routine and return
-        fprintf(stderr, "Error: Failed to allocate memory for results available condition variable\n");
+        // Failed to allocate memory for results_queue available condition variable; perform cleanup routine and return
+        fprintf(stderr, "Error: Failed to allocate memory for results_queue available condition variable\n");
         free_manager(manager);
         return NULL;
         
     } else if (pthread_cond_init(manager->next_result_available, NULL) != 0) { 
             
-        // Failed to initialize condition variable for results available; free allocated memory and destroy mutex and condition variable
-        fprintf(stderr, "Error: Failed to initialize condition variable for results available\n");
+        // Failed to initialize condition variable for results_queue available; free allocated memory and destroy mutex and condition variable
+        fprintf(stderr, "Error: Failed to initialize condition variable for results_queue available\n");
         free_manager(manager);
         return NULL; 
     }
     
-    // Initialize condition variable for signaling that tasks are completed and check for errors
+    // Initialize condition variable for signaling that tasks_queue are completed and check for errors
     if (!(manager->tasks_completed = (pthread_cond_t*)malloc(sizeof(pthread_cond_t)))) {
         
-        // Failed to allocate memory for tasks completed condition variable
-        fprintf(stderr, "Error: Failed to allocate memory for results available condition variable\n");
+        // Failed to allocate memory for tasks_queue completed condition variable
+        fprintf(stderr, "Error: Failed to allocate memory for results_queue available condition variable\n");
         free_manager(manager);
         return NULL;
         
     } else if (pthread_cond_init(manager->tasks_completed, NULL) != 0) { 
             
-        // Failed to initialize tasks completed condition variable
-        fprintf(stderr, "Error: Failed to initialize condition variable for results available\n");
+        // Failed to initialize tasks_queue completed condition variable
+        fprintf(stderr, "Error: Failed to initialize condition variable for results_queue available\n");
         free_manager(manager);
         return NULL; 
     }
@@ -226,7 +226,7 @@ int wait_for_signal(pthread_cond_t* condition, pthread_mutex_t* lock) {
 int yield_task(task_manager_t* manager, char* data, size_t size) {
     
     // Input validation
-    if (!manager) { // Empty tasks (task_data = NULL, task_size = 0) are allowed, as they act as EOF
+    if (!manager) { // Empty tasks_queue (task_data = NULL, task_size = 0) are allowed, as they act as EOF
         
         // Invalid input
         fprintf(stderr, "Failed to yield task: invalid input\n");
@@ -275,10 +275,10 @@ int yield_task(task_manager_t* manager, char* data, size_t size) {
     }
     
     // Add the task and result to the manager
-    manager->tasks[manager->rear] = task;
-    manager->results[manager->rear] = result;
+    manager->tasks_queue[manager->rear] = task;
+    manager->results_queue[manager->rear] = result;
     
-    // Increment number of available tasks and size and update rear index
+    // Increment number of available tasks_queue and size and update rear index
     manager->num_available_tasks++; 
     manager->size++;
     manager->rear = (manager->rear + 1) % manager->capacity;
@@ -301,7 +301,7 @@ int yield_task(task_manager_t* manager, char* data, size_t size) {
         return ERROR;
     }
     
-    // Successfully added tasks
+    // Successfully added tasks_queue
     return SUCCESS;
 }
 
@@ -324,25 +324,25 @@ task_t* claim_task(task_manager_t* manager) {
         return NULL;
     }
     
-    // Check if tasks are available 
+    // Check if tasks_queue are available 
     while (manager->num_available_tasks == 0) {
         
-        // Wait for tasks to become available
+        // Wait for tasks_queue to become available
         if (wait_for_signal(manager->tasks_available, manager->lock) != 0) {
             
-            // Failed to wait for tasks to become available
-            fprintf(stderr, "Failed to claim task: failed to wait for tasks to become available\n");
+            // Failed to wait for tasks_queue to become available
+            fprintf(stderr, "Failed to claim task: failed to wait for tasks_queue to become available\n");
             release_lock(manager->lock);
             return NULL;
         }
     }
     
     // Claim a task from the manager and check if it's valid
-    task_t* task = manager->tasks[manager->next_task_index]; // NULL pointer represents a termination signal
-    manager->tasks[manager->next_task_index] = NULL; // Set the tasks array slot to NULL (to avoid dangling pointers)
+    task_t* task = manager->tasks_queue[manager->tasks_front]; // NULL pointer represents a termination signal
+    manager->tasks_queue[manager->tasks_front] = NULL; // Set the tasks_queue array slot to NULL (to avoid dangling pointers)
     
-    // Increment next task index and decrement number of available tasks
-    manager->next_task_index = (manager->next_task_index + 1) % manager->capacity;
+    // Increment next task index and decrement number of available tasks_queue
+    manager->tasks_front = (manager->tasks_front + 1) % manager->capacity;
     manager->num_available_tasks--;
         
     // Release the lock
@@ -377,18 +377,18 @@ int yield_result(task_manager_t* manager, result_t* result, result_data_t* resul
         return ERROR;
     }
     
-    // Add the result to the managers results array
+    // Add the result to the managers results_queue array
     result->data = result_data;
     result->status = COMPLETED; // Set the status flag to COMPLETED
     
     // Check if the result is the next result in the queue
-    if (manager->results[manager->next_result_index] == result) {
+    if (manager->results_queue[manager->results_front] == result) {
     
         // Signal that the next result is available
         if (pthread_cond_signal(manager->next_result_available) != SUCCESS) {
             
-            // Failed to signal main thread that results are available
-            fprintf(stderr, "Failed to yield result: failed to signal that results are available\n");
+            // Failed to signal main thread that results_queue are available
+            fprintf(stderr, "Failed to yield result: failed to signal that results_queue are available\n");
             release_lock(manager->lock);
             return ERROR;
         }
@@ -427,7 +427,7 @@ result_data_t* claim_result(task_manager_t* manager) {
     }
     
     // Check if the next result is available
-    while (manager->results[manager->next_result_index] == NULL || manager->results[manager->next_result_index]->status != COMPLETED) {
+    while (manager->results_queue[manager->results_front] == NULL || manager->results_queue[manager->results_front]->status != COMPLETED) {
                 
         // Wait for the next result to become available
         if (wait_for_signal(manager->next_result_available, manager->lock) != SUCCESS) {
@@ -440,15 +440,15 @@ result_data_t* claim_result(task_manager_t* manager) {
     }
     
     // Get result data and free the result
-    result_data_t* data = manager->results[manager->next_result_index]->data;
-    manager->results[manager->next_result_index]->data = NULL; // Set the result data to NULL (to avoid dangling pointers)
+    result_data_t* data = manager->results_queue[manager->results_front]->data;
+    manager->results_queue[manager->results_front]->data = NULL; // Set the result data to NULL (to avoid dangling pointers)
     
     // Free the result and set the result array pointer to NULL (to avoid dangling pointers)
-    free_result(manager->results[manager->next_result_index]);
-    manager->results[manager->next_result_index] = NULL; 
+    free_result(manager->results_queue[manager->results_front]);
+    manager->results_queue[manager->results_front] = NULL; 
 
     // Increment next result index and decrement current size
-    manager->next_result_index = (manager->next_result_index + 1) % manager->capacity;
+    manager->results_front = (manager->results_front + 1) % manager->capacity;
     manager->size--; 
     
     // Signal that the task manager has room available
@@ -460,14 +460,14 @@ result_data_t* claim_result(task_manager_t* manager) {
         return NULL;
     }
     
-    // Check if all tasks have been completed
+    // Check if all tasks_queue have been completed
     if (manager->size == 0) {
         
-        // All tasks completed: Signal that all tasks have been completed
+        // All tasks_queue completed: Signal that all tasks_queue have been completed
         if (send_signal(manager->tasks_completed) != 0) {
             
-            // Failed to signal all tasks completed
-            fprintf(stderr, "Failed to claim result: failed to signal all tasks completed\n");
+            // Failed to signal all tasks_queue completed
+            fprintf(stderr, "Failed to claim result: failed to signal all tasks_queue completed\n");
             release_lock(manager->lock);
             return NULL;
         }
@@ -490,7 +490,7 @@ result_data_t* claim_result(task_manager_t* manager) {
 int yield_termination_task(task_manager_t* manager) {
     
     // Input validation
-    if (!manager) {  // NULL tasks are allowed as they act as termination signals
+    if (!manager) {  // NULL tasks_queue are allowed as they act as termination signals
         
         // Invalid input
         fprintf(stderr, "Error: Manager is NULL\n");
@@ -519,10 +519,10 @@ int yield_termination_task(task_manager_t* manager) {
     }
             
     // Add termination task to the manager's task list
-    manager->tasks[manager->rear] = NULL;
+    manager->tasks_queue[manager->rear] = NULL;
     
     // Initiate a termination result
-    if (!(manager->results[manager->rear] = init_result())) {
+    if (!(manager->results_queue[manager->rear] = init_result())) {
         
         // Failed to initialize result
         fprintf(stderr, "Failed to send termination signal: failed to initialize result\n");
@@ -531,14 +531,14 @@ int yield_termination_task(task_manager_t* manager) {
     }
     
     // Set termination result fields
-    manager->results[manager->rear]->status = COMPLETED;
-    manager->results[manager->rear]->data = NULL; 
+    manager->results_queue[manager->rear]->status = COMPLETED;
+    manager->results_queue[manager->rear]->data = NULL; 
     
     // Determine if the result is the next result
     int send_results_available_signal = FALSE; 
-    if (manager->rear == manager->next_result_index) send_results_available_signal = TRUE; 
+    if (manager->rear == manager->results_front) send_results_available_signal = TRUE; 
         
-    // Increment size, number of available tasks and results, and update rear index
+    // Increment size, number of available tasks_queue and results_queue, and update rear index
     manager->size++;
     manager->num_available_tasks++; 
     manager->rear = (manager->rear + 1) % manager->capacity;
@@ -574,7 +574,7 @@ int yield_termination_task(task_manager_t* manager) {
         return ERROR;
     }
     
-    // Successfully added tasks
+    // Successfully added tasks_queue
     return SUCCESS;
 }
 
@@ -592,7 +592,7 @@ void* free_manager(task_manager_t* manager) {
     // Check if mutex lock exists
     if (manager->lock) {
         
-        // Destroy mutex lock for tasks
+        // Destroy mutex lock for tasks_queue
         pthread_mutex_destroy(manager->lock);
         free(manager->lock);
     }
@@ -605,18 +605,18 @@ void* free_manager(task_manager_t* manager) {
         free(manager->room_available);
     }   
     
-    // Check if condition variable for tasks availability exists
+    // Check if condition variable for tasks_queue availability exists
     if (manager->tasks_available) {
         
-        // Destroy condition variable for tasks availability
+        // Destroy condition variable for tasks_queue availability
         pthread_cond_destroy(manager->tasks_available);
         free(manager->tasks_available);
     }
     
-    // Check if condition variable for results availability exists
+    // Check if condition variable for results_queue availability exists
     if (manager->next_result_available) {
         
-        // Destroy condition variable for results availability
+        // Destroy condition variable for results_queue availability
         pthread_cond_destroy(manager->next_result_available);
         free(manager->next_result_available);
     }
@@ -629,9 +629,9 @@ void* free_manager(task_manager_t* manager) {
         free(manager->tasks_completed);
     }
     
-    // Free memory allocated for tasks and results arrays
-    if (manager->tasks) free(manager->tasks);
-    if (manager->results) free(manager->results);
+    // Free memory allocated for tasks_queue and results_queue arrays
+    if (manager->tasks_queue) free(manager->tasks_queue);
+    if (manager->results_queue) free(manager->results_queue);
     
     // Free memory allocated for manager structure
     free(manager); 
@@ -640,7 +640,7 @@ void* free_manager(task_manager_t* manager) {
     return NULL; 
 }
 
-// Function to wait for all tasks to complete
+// Function to wait for all tasks_queue to complete
 int wait_for_completion(task_manager_t* manager) {
     
     // Input validation
@@ -660,24 +660,24 @@ int wait_for_completion(task_manager_t* manager) {
     }
     
     for (int i = 0; i < manager->capacity; i++) {
-        if (manager->results[i]) {
-            if (manager->results[i]->status == COMPLETED && manager->results[i]->data == NULL) {
+        if (manager->results_queue[i]) {
+            if (manager->results_queue[i]->status == COMPLETED && manager->results_queue[i]->data == NULL) {
                 fprintf(stderr, "Result %d is TERMINATION\n", i); 
-            } else if (manager->results[i]->status == COMPLETED && manager->results[i]->data != NULL) {
+            } else if (manager->results_queue[i]->status == COMPLETED && manager->results_queue[i]->data != NULL) {
                 fprintf(stderr, "Result %d is COMPLETED\n", i); 
             }
         }
     }
     
-    // Wait for all tasks to complete
+    // Wait for all tasks_queue to complete
     while (manager->size > 0) {
-        fprintf(stderr, "Waiting for tasks to complete (%zu tasks left)...\n", manager->size);
+        fprintf(stderr, "Waiting for tasks_queue to complete (%zu tasks_queue left)...\n", manager->size);
         
-        // Wait for tasks to become available
+        // Wait for tasks_queue to become available
         if (wait_for_signal(manager->tasks_completed, manager->lock) != SUCCESS) {
             
             // Failed to wait for condition variable
-            fprintf(stderr, "Failed to wait for completion: error occurred while waiting for tasks\n");
+            fprintf(stderr, "Failed to wait for completion: error occurred while waiting for tasks_queue\n");
             release_lock(manager->lock);
             return ERROR;
         }

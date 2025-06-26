@@ -92,44 +92,6 @@ file_manager_t* free_file_manager(file_manager_t* manager) {
     return NULL; 
 }
 
-// Function to check if a file is mapped
-mapped_file_t* is_mapped(file_manager_t* file_manager, const char* filepath) {
-    
-    // Input validation
-    if (!filepath || !file_manager) {
-        
-        // Invalid input
-        fprintf(stderr, "Failed to check if file is mapped. Invalid input\n");
-        return NULL;
-    }
-    
-    // Get file stats and check for errors
-    struct stat file_stat;
-    if (access(filepath, F_OK) == -1 && stat(filepath, &file_stat) == -1) {
-        
-        // File does not exist
-        fprintf(stderr, "Failed to get file stats");
-        return NULL;
-    }
-    
-    // Check if the file is already mapped
-    for (int i = 0; i < file_manager->num_mapped_files; i++) {
-        
-        // Get pointer to a mapped file
-        mapped_file_t* mapped_file = &file_manager->mapped_files[i];
-        
-        // Check if file stats match the already mapped file
-        if (mapped_file->st_dev == file_stat.st_dev && mapped_file->st_ino == file_stat.st_ino) {
-            
-            // File is already mapped
-            return mapped_file;
-        }
-    }
-    
-    // File is not mapped
-    return NULL;
-}
-
 // Function to map a file into memory
 mapped_file_t* map_next_file(file_manager_t* file_manager, const char *filepath) {
     

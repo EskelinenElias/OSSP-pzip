@@ -19,11 +19,8 @@
 #define PENDING 0
 
 // Parallel processing constants
-#define MAX_CHUNK_SIZE 1024 * 10
-#define TASK_SIZE 1024 * 10
-
+#define TASK_SIZE 1024
 #define MAX_THREADS 128
-
 #define MAX_CAPACITY 1000
 
 // Get the number of available CPU cores

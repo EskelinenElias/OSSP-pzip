@@ -13,7 +13,7 @@ int write_encoded_data_to_output(result_data_t* result) {
         return ERROR; 
     }
     
-    // Check if the test flag is set
+    // Check if the test flag is enabled
     if (TEST) {
         
         // Write test data to output as text
