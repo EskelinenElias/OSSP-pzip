@@ -1,0 +1,91 @@
+#include "../include/process.h"
+
+// Function to initialize process variables
+process_vars_t* init_process(size_t num_workers, size_t num_files) {
+        
+    // Input validation
+    if (num_workers < 1 || num_files < 1) {
+        
+        // Invalid input
+        fprintf(stderr, "Failed to initialize process, invalid input"); 
+        return NULL;
+    }
+    
+    // Allocate memory for process variables and check for errors
+    process_vars_t* process = malloc(sizeof(process_vars_t));
+    if (!process) {
+        
+        // Failed to allocate memory for process
+        fprintf(stderr, "Failed to initialize process, failed to allocate memory");
+        return NULL;
+    }
+    
+    // Initialize process fields
+    process->file_manager = NULL; 
+    process->task_manager = NULL;
+    process->workers = NULL; 
+    process->num_workers = num_workers; 
+    process->writer = NULL;
+    
+    // Initialize file manager and check for errors
+    if (!(process->file_manager = init_file_manager(num_files))) {
+        
+        // Failed to initialize file manager
+        fprintf(stderr, "Failed to initialize file manager");
+        return NULL; 
+    }
+    
+    // Initialize a task task_manager and check for errors
+    if (!(process->task_manager = init_manager(MAX_CAPACITY))) {
+        
+        // Failed to initialize task task_manager
+         fprintf(stderr, "Failed to initialize task task_manager");
+        return NULL; 
+    }
+    
+    // Initialize workers and check for errors
+    if (!(process->workers = init_workers(process->num_workers, process->task_manager))) { 
+        
+        // Failed to initialize workers
+        fprintf(stderr, "Failed to initialize workers"); 
+        return NULL; 
+    }
+    
+    // Initialize writer and check for errors
+    if (!(process->writer = init_writer(process->file_manager, process->task_manager))) {
+        
+        // Failed to initialize writer
+        fprintf(stderr, "Failed to initialize writer");
+        return NULL; 
+    }
+        
+    // Successfully initialized process
+    return process;
+}
+
+// Function to free process variables
+process_vars_t* free_process(process_vars_t* process) {
+        
+    // Terminate workers 
+    for (size_t i = 0; i < process->num_workers; i++) {
+        yield_termination_task(process->task_manager);
+    }
+        
+    // Wait for all threads to complete
+    for (size_t i = 0; i < process->num_workers; i++) {
+        pthread_join(process->workers[i], NULL);
+    }
+    
+    // Wait for writer to complete
+    terminate_writer(process->writer, process->task_manager);
+
+    // Free task manager
+    if (process->task_manager) free_manager(process->task_manager);
+    
+    // Free file manager
+    if (process->file_manager) free_file_manager(process->file_manager);
+            
+    // Free process variables
+    free(process);
+    return NULL; 
+}
