@@ -33,7 +33,7 @@ task_manager_t* init_task_manager(size_t capacity) {
         
         // Error; failed to allocate memory for tasks_queue array
         fprintf(stderr, "Failed to initialize task manager: failed to allocate memory for tasks queue\n");
-        return free_manager(manager);
+        return free_task_manager(manager);
     }
     
     // Allocate memory for an array of results_queue 
@@ -41,7 +41,7 @@ task_manager_t* init_task_manager(size_t capacity) {
         
         // Error; failed to allocate memory for tasks_queue array
         fprintf(stderr, "Failed to initialize task manager: failed to allocate memory for results queue\n");
-        return free_manager(manager);
+        return free_task_manager(manager);
     }
     
     // Initialize mutex lock for tasks_queue and check for errors
@@ -49,13 +49,13 @@ task_manager_t* init_task_manager(size_t capacity) {
         
         // Failed to allocate memory for tasks_queue lock; perform cleanup routine and return
         fprintf(stderr, "Failed to initialize task manager: failed to allocate memory for mutex lock\n");
-        return free_manager(manager);
+        return free_task_manager(manager);
         
     } else if (pthread_mutex_init(manager->lock, NULL) != 0) {
         
         // Failed to initialize mutex lock for tasks_queue; perform cleanup routine and return
         fprintf(stderr, "Failed to initialize task manager: failed to initialize mutex lock\n");
-        return free_manager(manager);
+        return free_task_manager(manager);
     };
     
     // Initialize condition variable for signaling room is available and check for errors
@@ -63,13 +63,13 @@ task_manager_t* init_task_manager(size_t capacity) {
         
         // Failed to allocate memory for room available condition variable; perform cleanup routine and return
         fprintf(stderr, "Failed to initialize task manager: failed to allocate memory for condition variable\n");
-        return free_manager(manager);
+        return free_task_manager(manager);
         
     } else if (pthread_cond_init(manager->room_available, NULL) != 0) { 
             
         // Error; free allocated memory and destroy mutex
         fprintf(stderr, "Failed to initialize task manager: failed to initialize condition variable\n");
-        return free_manager(manager);
+        return free_task_manager(manager);
     }
     
     // Initialize condition variable for signaling tasks_queue are available and check for errors
@@ -77,13 +77,13 @@ task_manager_t* init_task_manager(size_t capacity) {
         
         // Failed to allocate memory for tasks_queue available condition variable; perform cleanup routine and return
         fprintf(stderr, "Failed to initialize task manager: failed to allocate memory for condition variable\n");
-        return free_manager(manager);
+        return free_task_manager(manager);
         
     } else if (pthread_cond_init(manager->tasks_available, NULL) != 0) { 
             
         // Error; free allocated memory and destroy mutex
         fprintf(stderr, "Failed to initialize task manager: failed to initialize condition variable\n");
-        return free_manager(manager);
+        return free_task_manager(manager);
     }
     
     // Initialize condition variable for signaling that results_queue are available and check for errors
@@ -91,13 +91,13 @@ task_manager_t* init_task_manager(size_t capacity) {
         
         // Failed to allocate memory for results_queue available condition variable; perform cleanup routine and return
         fprintf(stderr, "Failed to initialize task manager: failed to allocate memory for condition variable\n");
-        return free_manager(manager);
+        return free_task_manager(manager);
         
     } else if (pthread_cond_init(manager->next_result_available, NULL) != 0) { 
             
         // Failed to initialize condition variable for results_queue available; free allocated memory and destroy mutex and condition variable
         fprintf(stderr, "Failed to initialize task manager: failed to initialize condition variable\n");
-        return free_manager(manager);
+        return free_task_manager(manager);
     }
     
     // Initialize condition variable for signaling that tasks_queue are completed and check for errors
@@ -105,13 +105,13 @@ task_manager_t* init_task_manager(size_t capacity) {
         
         // Failed to allocate memory for tasks_queue completed condition variable
         fprintf(stderr, "Failed to initialize task manager: failed to allocate memory for condition variablen");
-        return free_manager(manager);
+        return free_task_manager(manager);
         
     } else if (pthread_cond_init(manager->tasks_completed, NULL) != 0) { 
             
         // Failed to initialize tasks_queue completed condition variable
         fprintf(stderr, "Failed to initialize task manager: failed to initialize condition variable\n");
-        return free_manager(manager);
+        return free_task_manager(manager);
     }
     
     // Successfully created manager

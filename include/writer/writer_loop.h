@@ -1,5 +1,5 @@
-#ifndef WRITER_H
-#define WRITER_H
+#ifndef WRITER_LOOP_H
+#define WRITER_LOOP_H
 
 #include <stdio.h>
 #include <pthread.h>
@@ -20,13 +20,6 @@ typedef struct {
 } writer_args_t;
 
 // Function to process the input in threads
-void* writer(void* args); 
+void* writer_loop(void* args); 
 
-// Function to initialize worker threads
-pthread_t* init_writer(file_manager_t* file_manager, task_manager_t* task_manager); 
-
-// int terminate_writer(pthread_t *threads, size_t num_workers, task_manager_t *queue);
-
-void* terminate_writer(pthread_t* writer, task_manager_t* task_manager); 
-
-#endif // WRITER_H
+#endif // WRITER_LOOP_H

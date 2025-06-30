@@ -1,47 +1,7 @@
-#include "../../include/writer/writer.h"
-
-// Function to initialize writer thread
-pthread_t* init_writer(file_manager_t* file_manager, task_manager_t* task_manager) {
-    
-    // Allocate memory for writer thread and check for errors
-    pthread_t* writer_thread = (pthread_t*)malloc(sizeof(pthread_t));
-    if (!writer_thread) {
-        
-        // Failed to allocate memory for writer thread
-        fprintf(stderr, "Failed to allocate memory for writer thread\n");
-        return NULL;
-    }
-    
-    // Allocate memory for writer arguments
-    writer_args_t* writer_args = malloc(sizeof(writer_args_t));
-    if (!writer_args) {
-        
-        // Failed to allocate memory for writer arguments
-        fprintf(stderr, "Failed to allocate memory for writer arguments\n");
-        free(writer_thread);
-        return NULL;
-    }
-    
-    // Initialize writer arguments
-    writer_args->file_manager = file_manager;
-    writer_args->task_manager = task_manager;
-    
-    // Initialize writer thread
-    if (pthread_create(writer_thread, NULL, writer, writer_args) != 0) {
-        
-        // Failed to create writer thread
-        fprintf(stderr, "Failed to create writer thread\n");
-        free(writer_thread);
-        free(writer_args);
-        return NULL;
-    }
-    
-    // Successfully initialized writer thread
-    return writer_thread;
-}
+#include "../../include/writer/writer_loop.h"
 
 // Writer loop
-void* writer(void* args) {
+void* writer_loop(void* args) {
     
     // Cast arguments
     writer_args_t* writer_args = (writer_args_t*)args;
@@ -132,22 +92,4 @@ void* writer(void* args) {
     return NULL; 
 }
 
-// Function to terminate writer thread
-// void* terminate_writer(pthread_t* writer, task_manager_t* task_manager) {
-    
-//     // Input validation
-//     if (!writer) {
-        
-//         // Invalid input
-//         fprintf(stderr, "Failed to terminate writer: invalid input\n");
-//         return NULL;
-//     }
-    
-//     // Yield a termination task 
-//     yield_termination_task(task_manager); 
-    
-//     // Join the writer thread
-//     pthread_join(*writer, NULL);
-    
-//     return NULL; 
-// }
+// EOF
