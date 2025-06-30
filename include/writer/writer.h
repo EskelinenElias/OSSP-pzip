@@ -8,6 +8,7 @@
 #include "../../include/writer/handle_boundary.h"
 #include "../../include/writer/write_to_output.h"
 #include "../../include/file_manager/file_manager.h"
+#include "../../include/file_manager/unmap_next_file.h"
 #include "../../include/task_manager/task_manager.h"
 #include "../../include/task_manager/claim_result_data.h"
 #include "../../include/task_manager/result.h"

@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
                 
     // Encode the files and write encoded data to output
     for (size_t i = 0; i < num_files; i++) {
-                        
+        
         // Map a new file to memory
         mapped_file_t* current_file = map_next_file(process->file_manager, argv[i + 1]); 
         if (!current_file) {
@@ -149,7 +149,7 @@ int main(int argc, char *argv[]) {
             free_process(process); 
             return ERROR; 
         }
-                        
+                                
         // Yield tasks to task task_manager until end of file is reached
         for (size_t t = 0; t < current_file->size; t += TASK_SIZE) {
             

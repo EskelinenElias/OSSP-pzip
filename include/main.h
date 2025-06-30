@@ -7,7 +7,10 @@
 #include <math.h>
 
 #include "../include/constants.h"
-#include "../include/file_manager/file_manager.h"
+#include "../include/file_manager/init_file_manager.h"
+#include "../include/file_manager/free_file_manager.h"
+#include "../include/file_manager/map_next_file.h"
+#include "../include/file_manager/unmap_next_file.h"
 #include "../include/task_manager/init_task_manager.h"
 #include "../include/task_manager/yield_task_data.h"
 #include "../include/worker/init_worker.h"
