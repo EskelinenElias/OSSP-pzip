@@ -1,95 +1,70 @@
+# The Parallel Zip Tool 
 
-# Parallel Zip
+The parallel zip (pzip) tool compresses one or more input files using run length encoding. It uses parallel processing to increase compression speed. 
 
-In an earlier project, you implemented a simple compression tool based on
-run-length encoding, known simply as `zip`. Here, you'll implement something
-similar, except you'll use threads to make a parallel version of `zip`. We'll
-call this version ... wait for it ... `pzip`. 
+## Usage
 
-There are three specific objectives to this assignment:
+The tool can be used to run length encode one or more files to a single output file. If multiple files are encoded into one output file, file boundary information can't be recovered from the encoded file. The tool can be run with the command `./pzip file1 [file2 ...]`. The output can be directed to another file (here, `output_file`) by changing the command to `./pzip file1 [file2 ...] > output_file`. 
 
-* To familiarize yourself with the Linux pthreads.
-* To learn how to parallelize a program.
-* To learn how to program for high performance.
+## Project structure
 
-## Background
+The project is structured as follows: 
+- Source code can be found in the directory `src` and the corresponding header files in the directory `include`. 
+- Compiled code goes in the `obj`-directory. 
+- Tests can be found from the `tests`-directory. Automated tests can be run from the root directory by running the command `./run_tests.sh`. 
+- Project can be compiled by running the command `make` in the root directory. This compiles the project according to the instructions in `Makefile` in the root directory.
 
-To understand how to make progress on this project, you should first
-understand the basics of thread creation, and perhaps locking and signaling
-via mutex locks and condition variables. These are described in the following
-book chapters:
+## Implementation 
 
-- [Intro to Threads](http://pages.cs.wisc.edu/~remzi/OSTEP/threads-intro.pdf)
-- [Threads API](http://pages.cs.wisc.edu/~remzi/OSTEP/threads-api.pdf)
-- [Locks](http://pages.cs.wisc.edu/~remzi/OSTEP/threads-locks.pdf)
-- [Using Locks](http://pages.cs.wisc.edu/~remzi/OSTEP/threads-locks-usage.pdf)
-- [Condition Variables](http://pages.cs.wisc.edu/~remzi/OSTEP/threads-cv.pdf)
+The algorithm utilizes parallel processing to speed up the encoding process. The main thread spawns worker threads and a specialized writer thread. The number of worker threads is determined from the number of cores available. 
 
-Read these chapters carefully in order to prepare yourself for this project.
+The main thread starts processing the input files one by one. An input file is mapped into memory and then the main thread divides the data in the file to 'tasks'. A task is a chunk of the input data of a certain length. The tasks are put into a task queue, from where the worker threads can claim the task. 
 
-## Overview
-
-First, recall how `zip` works by reading the description
-[here](https://github.com/remzi-arpacidusseau/ostep-projects/tree/master/initial-utilities). 
-You'll use the same basic specification, with run-length encoding as the basic
-technique.
-
-Your parallel zip (`pzip`) will externally look the same; the general usage
-from the command line will be as follows:
-
-```
-prompt> ./pzip file > file.z
-```
-
-As before, there may be many input files (not just one, as above). However,
-internally, the program will use POSIX threads to parallelize the compression
-process.  
-
-## Considerations
-
-Doing so effectively and with high performance will require you to address (at
-least) the following issues:
-
-- **How to parallelize the compression.** Of course, the central challenge of
-    this project is to parallelize the compression process. Think about what
-    can be done in parallel, and what must be done serially by a single
-    thread, and design your parallel zip as appropriate.
-
-    One interesting issue that the "best" implementations will handle is this:
-    what happens if one thread runs more slowly than another? Does the
-    compression give more work to faster threads? 
-
-- **How to determine how many threads to create.** On Linux, this means using
-    interfaces like `get_nprocs()` and `get_nprocs_conf()`; read the man pages
-    for more details. Then, create threads to match the number of CPU
-    resources available.
-
-- **How to efficiently perform each piece of work.** While parallelization
-    will yield speed up, each thread's efficiency in performing the
-    compression is also of critical importance. Thus, making the core
-    compression loop as CPU efficient as possible is needed for high
-    performance. 
-
-- **How to access the input file efficiently.** On Linux, there are many ways
-    to read from a file, including C standard library calls like `fread()` and
-    raw system calls like `read()`. One particularly efficient way is to use
-    memory-mapped files, available via `mmap()`. By mapping the input file
-    into the address space, you can then access bytes of the input file via
-    pointers and do so quite efficiently. 
+Worker threads then start to process these tasks, and yield the results to a results queue. 
 
 
-## Grading
+of a set size (chunk size can be changed by the constant `TASK_SIZE` in the file `./include/constants.h`). The worker threads process these chunks, or tasks'
 
-Your code should compile (and should be compiled) with the following flags:
-`-Wall -Werror -pthread -O`. The last one is important: it turns on the
-optimizer! In fact, for fun, try timing your code with and without `-O` and
-marvel at the difference.
+Parallel processing -wise, the algorithm works as follows
 
-Your code will first be measured for correctness, ensuring that it zips input
-files correctly.
+1. The main thread spanwns worker threads and a specialiced writer thread. 
+2. 
 
-If you pass the correctness tests, your code will be tested for performance;
-higher performance will lead to better scores.
+The parallel processing is done by dividing the input data to chunks of the same size. The chunks are then fed into a task queue, from where worker threads will claim them and process them. Race conditions are avoided by using a mutex lock in the queue. 
+
+The worker threads encode the data to encoded data objects, which contain an array for characters and an array for subsequent character counts, as well as capacity and current size parameters. 
+
+A boundary condition can arise where subsequent chunks divide a substring of subsequent characters (for example, the first chunk end in "bbaa", and the second chunk starts with "aaab", resulting to encodings "2b2a" and "3a1b"). If this condition is met, it is handled before writing the encoded data to the output stream by substracting the last character count from the first chunk and adding it to the second chunk (first chunk becomes "2b" and the second chunk becomes "5a1b"). 
+
+## main.c  
+
+The main function parses and validates the input arguments, initializes all needed components
+
+## The task queue
+
+This implementation of `pzip` utilizes a task queue to distribute encoding tasks to the threads. The input is divided into $n$ chunks, and for each chunk, an encoding task is added to the task queue. An encoding task consists of the chunk of the input, the length of the chunk and a pointer to an encoded data structure for the output. The threads then claim these encoding tasks, process them and claim more when they are ready. The queue utilizes mutex locks to avoid race conditions on claiming tasks. More tasks are added to the queue as the already added tasks are processed; the length of the task queue is by default twice the number of threads. After all tasks have been processed, the threads are terminated. 
+
+## The encoding task structure
+
+The encoding task structure contains a pointer to a character array, the length of the array to be processed, and a pointer to an encoded data structure, where the encoding results will be stored. 
+
+## The worker 
+
+Each thread runs an endless loop, which consists of the following steps: 
+1. The thread checks if the task queue has available tasks, waits if it doesn't
+2. As a task becomes available, the thread claims the task. 
+3. The thread checks, if the task is empty, and terminates if it is - an empty task can be used to terminate the thread. 
+4. The thread processes the input data in the task, and stores the encoded data in the output slot of the task. 
+5. The thread repeats steps 1-4. 
+
+## The encoded data structure
+
+The encoded data structure consists of a character array for storing the characters, and an integer array for storing the counts of subsequent matching characters, as well as the current utilied length of the arrays and the allocated. capacity of the arrays.
+
+## The encoding loop  
+
+The encoding function takes as arguments a pointer to an input character array, the length of the array, and a pointer to a output encoded data structure. The algorithm then loops trough the input array, counting subsequent matching characters and storing the counts and characters to the output structure. 
+
 
 
 

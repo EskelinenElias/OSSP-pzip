@@ -22,7 +22,8 @@ process_vars_t* init_process(size_t num_cores, size_t num_files) {
     
     // Initialize process fields
     process->file_manager = NULL; 
-    process->task_manager = NULL;
+    process->tasks_queue = NULL;
+    process->results_queue = NULL; 
     process->workers = NULL; 
     process->num_workers = num_cores - 1 ; 
     process->writer = NULL;
@@ -32,21 +33,26 @@ process_vars_t* init_process(size_t num_cores, size_t num_files) {
         
         // Failed to initialize file manager
         fprintf(stderr, "Failed to initialize process: failed to initialize file manager\n");
-        return (process_vars_t*)free_process(process); ; 
+        free_process(process); 
+        return NULL;
     }
     
-    // Initialize a task task_manager and check for errors
-    if (!(process->task_manager = init_task_manager(MAX_CAPACITY))) {
+    // Initialize tasks queue and check for errors
+    if (!(process->tasks_queue = init_tasks_queue(MAX_CAPACITY))) {
         
         // Failed to initialize task task_manager
-        fprintf(stderr, "Failed to initialize process: failed to initialize task manager\n");
-        return (process_vars_t*)free_process(process); ; 
+        fprintf(stderr, "Failed to initialize process: failed to initialize tasks queue\n");
+        free_process(process); 
+        return NULL;
     }
     
-    if (!process->task_manager->lock) {
+    // Initialize results queue and check for errors
+    if (!(process->results_queue = init_results_queue(MAX_CAPACITY))) {
         
-        fprintf(stderr, "Failed to initialize process: failed to initialize task manager lock\n");
-        return (process_vars_t*)free_process(process); 
+        // Failed to initialize task task_manager
+        fprintf(stderr, "Failed to initialize process: failed to initialize results queue\n");
+        free_process(process); 
+        return NULL;
     }
     
     // Allocate memory for workers and check for errors
@@ -54,27 +60,30 @@ process_vars_t* init_process(size_t num_cores, size_t num_files) {
         
         // Failed to allocate memory for workers
         fprintf(stderr, "Failed to initialize process: failed to allocate memory for workers\n");
-        return (process_vars_t*)free_process(process);
+        free_process(process); 
+        return NULL;
     }
     
     // Initialize workers and check for errors
     for (size_t i = 0; i < process->num_workers; i++) {
         
         // Initialize a worker and check for errors
-        if (!(process->workers[i] = init_worker(process->task_manager))) {
+        if (!(process->workers[i] = init_worker(process->tasks_queue, process->results_queue))) {
             
             // Failed to initialize worker
             fprintf(stderr, "Failed to initialize process: failed to initialize worker %zu\n", i);
-            return (process_vars_t*)free_process(process);
+            free_process(process); 
+            return NULL;
         }
     }
     
     // Initialize writer and check for errors
-    if (!(process->writer = init_writer(process->file_manager, process->task_manager))) {
+    if (!(process->writer = init_writer(process->file_manager, process->results_queue))) {
         
         // Failed to initialize writer
         fprintf(stderr, "Failed to initialize process: failed to initialize writer\n");
-        return (process_vars_t*)free_process(process);
+        free_process(process); 
+        return NULL;
     }
         
     // Successfully initialized process

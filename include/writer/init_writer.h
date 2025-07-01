@@ -6,10 +6,10 @@
 
 #include "../../include/constants.h"
 #include "../../include/file_manager/file_manager.h"
-#include "../../include/task_manager/task_manager.h"
-#include "../../include/writer/writer_loop.h"
+#include "../../include/results_queue/results_queue.h"
+#include "../../include/writer/process_results.h"
 
 // Function to initialize the writer thread
-pthread_t* init_writer(file_manager_t* file_manager, task_manager_t* task_manager); 
+pthread_t* init_writer(file_manager_t* file_manager, results_queue_t* results_queue); 
 
 #endif // INIT_WRITER_H

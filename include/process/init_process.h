@@ -6,7 +6,8 @@
 #include "../../include/process/process.h"
 #include "../../include/process/free_process.h"
 #include "../../include/file_manager/init_file_manager.h"
-#include "../../include/task_manager/init_task_manager.h"
+#include "../../include/tasks_queue/init_tasks_queue.h"
+#include "../../include/results_queue/init_results_queue.h"
 #include "../../include/worker/init_worker.h"
 #include "../../include/writer/init_writer.h"
 

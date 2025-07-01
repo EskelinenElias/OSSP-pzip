@@ -8,7 +8,7 @@ SRCDIR = src
 OBJDIR = obj
 
 # Executable name
-TARGET = wzip
+TARGET = pzip
 
 # Find all source files recursively
 SOURCES := $(shell find $(SRCDIR) -name '*.c')

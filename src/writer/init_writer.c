@@ -1,7 +1,7 @@
 #include "../../include/writer/init_writer.h"
 
 // Function to initialize writer thread
-pthread_t* init_writer(file_manager_t* file_manager, task_manager_t* task_manager) {
+pthread_t* init_writer(file_manager_t* file_manager, results_queue_t* results_queue) {
     
     // Allocate memory for writer thread and check for errors
     pthread_t* writer = (pthread_t*)malloc(sizeof(pthread_t));
@@ -24,10 +24,10 @@ pthread_t* init_writer(file_manager_t* file_manager, task_manager_t* task_manage
     
     // Set writer arguments
     args->file_manager = file_manager;
-    args->task_manager = task_manager;
+    args->results_queue = results_queue;
     
     // Initialize writer thread
-    if (pthread_create(writer, NULL, writer_loop, args) != 0) {
+    if (pthread_create(writer, NULL, process_results, args) != 0) {
         
         // Failed to create writer thread
         fprintf(stderr, "Failed to create writer thread\n");
