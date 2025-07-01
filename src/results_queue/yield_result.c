@@ -20,7 +20,7 @@ int yield_result(results_queue_t* results_queue, result_data_t* result_data, siz
     }
     
     // Check that the reserved index is actually empty
-    if (results_queue->results[reserved_index] != NULL || results_queue->statuses[reserved_index] == COMPLETED) {
+    if (results_queue->results[reserved_index] != NULL || results_queue->status_flags[reserved_index] == COMPLETED) {
         
         // Reserved spot is not empty
         fprintf(stderr, "Failed to yield result to results queue: something went wrong\n"); 
@@ -29,7 +29,7 @@ int yield_result(results_queue_t* results_queue, result_data_t* result_data, siz
     
     // Add the result to the reserved spot and set it's status as completed
     results_queue->results[reserved_index] = result_data; 
-    results_queue->statuses[reserved_index] = COMPLETED; 
+    results_queue->status_flags[reserved_index] = COMPLETED; 
     
     // Check if the result is at the front of the queue
     if (reserved_index == results_queue->front) {

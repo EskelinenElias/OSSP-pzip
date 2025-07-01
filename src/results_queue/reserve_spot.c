@@ -47,7 +47,7 @@ size_t reserve_spot(results_queue_t* results_queue) {
     
     // Initialize the result and it's status flag
     results_queue->results[reserved_index] = NULL; 
-    results_queue->statuses[reserved_index] = PENDING; 
+    results_queue->status_flags[reserved_index] = PENDING; 
     
     // Increment queue size and update rear index
     results_queue->size++;

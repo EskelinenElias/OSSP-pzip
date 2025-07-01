@@ -40,15 +40,15 @@ results_queue_t* init_results_queue(size_t capacity) {
     }
     for (size_t i = 0; i < capacity; i++) results_queue->results[i] = NULL;
     
-    // Allocate memory for statuses
-    if (!(results_queue->statuses = (int*)malloc(sizeof(int) * capacity))) {
+    // Allocate memory for status_flags
+    if (!(results_queue->status_flags = (int*)malloc(sizeof(int) * capacity))) {
         
         // Failed to allocate memory for results
-        fprintf(stderr, "Failed to initialize results queue: failed to allocate memory for statuses\n");
+        fprintf(stderr, "Failed to initialize results queue: failed to allocate memory for status_flags\n");
         free_results_queue(results_queue);
         return NULL; 
     }
-    for (size_t i = 0; i < capacity; i++) results_queue->statuses[i] = PENDING;
+    for (size_t i = 0; i < capacity; i++) results_queue->status_flags[i] = PENDING;
     
     // Allocate memory for mutex lock 
     if (!(results_queue->lock = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t)))) {

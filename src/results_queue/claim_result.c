@@ -20,7 +20,7 @@ result_data_t* claim_result(results_queue_t* results_queue) {
     }
     
     // Check if the next result is available
-    while (results_queue->statuses[results_queue->front] != COMPLETED) {
+    while (results_queue->status_flags[results_queue->front] != COMPLETED) {
                 
         // Wait for the next result to become available
         if (pthread_cond_wait(results_queue->result_available, results_queue->lock) != 0) {
