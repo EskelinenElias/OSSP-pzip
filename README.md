@@ -18,53 +18,44 @@ The project is structured as follows:
 
 The algorithm utilizes parallel processing to speed up the encoding process. The main thread spawns worker threads and a specialized writer thread. The number of worker threads is determined from the number of cores available. 
 
-The main thread starts processing the input files one by one. An input file is mapped into memory and then the main thread divides the data in the file to 'tasks'. A task is a chunk of the input data of a certain length. The tasks are put into a task queue, from where the worker threads can claim the task. 
+The main thread starts processing the input files one by one. An input file is mapped into memory and then the main thread divides the data in the file to 'tasks'. A task is a chunk of the input data of a certain length (`TASK_SIZE` in `include/constants.h`). The tasks are put into a task queue, from where the worker threads can claim the task. 
 
-Worker threads then start to process these tasks, and yield the results to a results queue. 
+Worker threads then start to process these tasks, and yield the results to a results queue. The writer thread claims these results from the results queue (in the correct order) and writes them to the output file. 
 
+Race conditions are avoided by using a mutex locks. Dividing the input data into tasks means that work is distributed dynamically. Memory management is also done dynamically to minimize memory usage and to simplify memory ownership between threads. Busy waiting is avoided by using condition variables. 
 
-of a set size (chunk size can be changed by the constant `TASK_SIZE` in the file `./include/constants.h`). The worker threads process these chunks, or tasks'
+The separate writer thread enables writing the results to output as they are processed. As the process is mainly IO-bound, this should speed it up. 
+ 
+## The main thread
 
-Parallel processing -wise, the algorithm works as follows
+The main function parses and validates the input arguments, initializes all needed components (file manager, tasks queue, worker threads, results queue, and the writer thread), yields tasks to the tasks queue and then cleans up the process. 
 
-1. The main thread spanwns worker threads and a specialiced writer thread. 
-2. 
+## The file manager
 
-The parallel processing is done by dividing the input data to chunks of the same size. The chunks are then fed into a task queue, from where worker threads will claim them and process them. Race conditions are avoided by using a mutex lock in the queue. 
+The file manager handles memory mapping the input files. It ensures, that already mapped files are not mapped again and that files are not unmapped too early. This is achieved by using a mapped file queue, where new files are added to the end of the queue, and files are unmapped from the front of the queue. New files are compared to the files in the queue to avoid trying to map them again. File manager also ensures, that all opened files are closed when the program exits.
 
-The worker threads encode the data to encoded data objects, which contain an array for characters and an array for subsequent character counts, as well as capacity and current size parameters. 
+## The task data structure
+
+The task data structure contains a pointer to the input data (a memory mapped file), the size of the input data to process and a reserved index to the results queue, which is used when yielding the result of the task to the results queue. 
+
+## The tasks queue
+
+The tasks queue manages encoding tasks and makes sure they are claimed in the correct order and that no task is claimed twice. The main thread yields tasks to the tasks queue, and the worker threads claim tasks from the tasks queue. 
+
+## The worker threads
+
+The worker threads process the tasks in the tasks queue and then yield the results to the results queue, to the reserved index which is part of the task data. The worker claims a task from the tasks queue, encodes the data, and yields the result to the results queue. The thread will terminate upon error or when it claims a NULL task.
+
+## The result data structure
+
+The result data structure represents a chunk of encoded data. It contains a character array, a character counts array and the current size of these arrays. 
+
+## The results queue
+
+The results queue manages results (encoded data) and makes sure they remain in the correct order. Worker threads yield results to the results queue, and the writer thread claims these results in order. In order to yield a result to the results queue, an index for the result must be reserved first; this is done when initializing the corresponding task. The result is then yielded with the reserved index, and the result is put in it's reserved spot in the queue. This is done to ensure that the writer thread receives the results in the correct order. 
+
+## The writer thread
+
+The writer thread claims encoding results from the results queue. The results queue ensures that the results are in the correct order. The writer thread handles boundaries between subsequent results and then writes the results to the output stream. The writer thread will terminate upon error or when it claims a NULL result. When encountering an EOF result (encoding data with the size 0), the writer thread tells the file manager to unmap the next file. 
 
 A boundary condition can arise where subsequent chunks divide a substring of subsequent characters (for example, the first chunk end in "bbaa", and the second chunk starts with "aaab", resulting to encodings "2b2a" and "3a1b"). If this condition is met, it is handled before writing the encoded data to the output stream by substracting the last character count from the first chunk and adding it to the second chunk (first chunk becomes "2b" and the second chunk becomes "5a1b"). 
-
-## main.c  
-
-The main function parses and validates the input arguments, initializes all needed components
-
-## The task queue
-
-This implementation of `pzip` utilizes a task queue to distribute encoding tasks to the threads. The input is divided into $n$ chunks, and for each chunk, an encoding task is added to the task queue. An encoding task consists of the chunk of the input, the length of the chunk and a pointer to an encoded data structure for the output. The threads then claim these encoding tasks, process them and claim more when they are ready. The queue utilizes mutex locks to avoid race conditions on claiming tasks. More tasks are added to the queue as the already added tasks are processed; the length of the task queue is by default twice the number of threads. After all tasks have been processed, the threads are terminated. 
-
-## The encoding task structure
-
-The encoding task structure contains a pointer to a character array, the length of the array to be processed, and a pointer to an encoded data structure, where the encoding results will be stored. 
-
-## The worker 
-
-Each thread runs an endless loop, which consists of the following steps: 
-1. The thread checks if the task queue has available tasks, waits if it doesn't
-2. As a task becomes available, the thread claims the task. 
-3. The thread checks, if the task is empty, and terminates if it is - an empty task can be used to terminate the thread. 
-4. The thread processes the input data in the task, and stores the encoded data in the output slot of the task. 
-5. The thread repeats steps 1-4. 
-
-## The encoded data structure
-
-The encoded data structure consists of a character array for storing the characters, and an integer array for storing the counts of subsequent matching characters, as well as the current utilied length of the arrays and the allocated. capacity of the arrays.
-
-## The encoding loop  
-
-The encoding function takes as arguments a pointer to an input character array, the length of the array, and a pointer to a output encoded data structure. The algorithm then loops trough the input array, counting subsequent matching characters and storing the counts and characters to the output structure. 
-
-
-
-

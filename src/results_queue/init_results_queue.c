@@ -38,6 +38,7 @@ results_queue_t* init_results_queue(size_t capacity) {
         free_results_queue(results_queue);
         return NULL; 
     }
+    for (size_t i = 0; i < capacity; i++) results_queue->results[i] = NULL;
     
     // Allocate memory for statuses
     if (!(results_queue->statuses = (int*)malloc(sizeof(int) * capacity))) {
@@ -47,6 +48,7 @@ results_queue_t* init_results_queue(size_t capacity) {
         free_results_queue(results_queue);
         return NULL; 
     }
+    for (size_t i = 0; i < capacity; i++) results_queue->statuses[i] = PENDING;
     
     // Allocate memory for mutex lock 
     if (!(results_queue->lock = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t)))) {

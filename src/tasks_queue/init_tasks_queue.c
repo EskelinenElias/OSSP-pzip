@@ -38,6 +38,7 @@ tasks_queue_t* init_tasks_queue(size_t capacity) {
         free_tasks_queue(tasks_queue);
         return NULL; 
     }
+    for (size_t i = 0; i < capacity; i++) tasks_queue->tasks[i] = NULL;
     
     // Allocate memory for mutex lock 
     if (!(tasks_queue->lock = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t)))) {

@@ -25,7 +25,7 @@ process_vars_t* init_process(size_t num_cores, size_t num_files) {
     process->tasks_queue = NULL;
     process->results_queue = NULL; 
     process->workers = NULL; 
-    process->num_workers = num_cores - 1 ; 
+    process->num_workers = num_cores; 
     process->writer = NULL;
     
     // Initialize file manager and check for errors
