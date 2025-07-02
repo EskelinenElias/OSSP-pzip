@@ -1,7 +1,7 @@
 #include "../../include/writer/handle_boundary.h"
 
 // Function to handle the boundary on subsequent results 
-int handle_boundary(result_data_t* left, result_data_t* right) {
+int handle_boundary(result_t* left, result_t* right) {
     
     // Check if the left and right object contain data
     if (left == NULL || right == NULL || left->capacity == 0 || right->capacity == 0) {

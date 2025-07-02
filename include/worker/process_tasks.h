@@ -9,8 +9,8 @@
 #include "../../include/tasks_queue/claim_task.h"
 #include "../../include/results_queue/results_queue.h"
 #include "../../include/results_queue/yield_result.h"
-#include "../../include/result_data/free_result_data.h"
-#include "../../include/task_data/free_task_data.h"
+#include "../../include/result/free_result.h"
+#include "../../include/task/free_task.h"
 
 // Structure to hold worker arguments
 typedef struct {

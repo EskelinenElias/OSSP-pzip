@@ -1,10 +1,10 @@
-#include "../../include/result_data/init_result_data.h"
+#include "../../include/result/init_result.h"
 
-// Function to initialize result data
-result_data_t* init_result_data(size_t initial_capacity) {
+// Function to initialize result
+result_t* init_result(size_t initial_capacity) {
     
-    // Allocate memory for the encoded data structure
-    result_data_t* result = (result_data_t*)malloc(sizeof(result_data_t));
+    // Allocate memory for result
+    result_t* result = (result_t*)malloc(sizeof(result_t));
     if (!result) {
         
         // Failed to allocate memory

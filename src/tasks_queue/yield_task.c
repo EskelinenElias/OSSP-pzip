@@ -1,10 +1,10 @@
 #include "../../include/tasks_queue/yield_task.h"
 
 // Function to yield task to tasks queue
-int yield_task(tasks_queue_t* tasks_queue, task_data_t* task_data) {
+int yield_task(tasks_queue_t* tasks_queue, task_t* task) {
     
     // Input validation
-    if (!tasks_queue || !tasks_queue->lock || !tasks_queue->tasks || !tasks_queue->room_available || (task_data && task_data->reserved_index < 0)) {
+    if (!tasks_queue || !tasks_queue->lock || !tasks_queue->tasks || !tasks_queue->room_available || (task && task->reserved_index < 0)) {
         
         // Invalid input
         fprintf(stderr, "Failed to yield task: invalid input\n");
@@ -34,7 +34,7 @@ int yield_task(tasks_queue_t* tasks_queue, task_data_t* task_data) {
     
     // Add the task to the end of the queue, increment size and update rear index
     size_t task_index = tasks_queue->rear; 
-    tasks_queue->tasks[task_index] = task_data; 
+    tasks_queue->tasks[task_index] = task; 
     tasks_queue->size++;
     tasks_queue->rear = (tasks_queue->rear + 1) % tasks_queue->capacity;
     

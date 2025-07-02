@@ -31,7 +31,7 @@ tasks_queue_t* init_tasks_queue(size_t capacity) {
     tasks_queue->lock = NULL; 
     
     // Allocate memory for tasks
-    if (!(tasks_queue->tasks = (task_data_t**)malloc(sizeof(task_data_t*) * capacity))) {
+    if (!(tasks_queue->tasks = (task_t**)malloc(sizeof(task_t*) * capacity))) {
         
         // Failed to allocate memory for tasks
         fprintf(stderr, "Failed to initialize tasks queue: failed to allocate memory for tasks\n");

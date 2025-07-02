@@ -1,7 +1,7 @@
-#include "../../include/task_data/free_task_data.h"
+#include "../../include/task/free_task.h"
 
-// Function to free task data
-int free_task_data(task_data_t* task) {
+// Function to free task
+int free_task(task_t* task) {
         
     // Free allocated memory for task
     free(task);

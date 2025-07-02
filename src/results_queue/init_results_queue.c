@@ -31,7 +31,7 @@ results_queue_t* init_results_queue(size_t capacity) {
     results_queue->lock = NULL; 
     
     // Allocate memory for results
-    if (!(results_queue->results = (result_data_t**)malloc(sizeof(result_data_t*) * capacity))) {
+    if (!(results_queue->results = (result_t**)malloc(sizeof(result_t*) * capacity))) {
         
         // Failed to allocate memory for results
         fprintf(stderr, "Failed to initialize results queue: failed to allocate memory for results\n");

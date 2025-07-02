@@ -1,7 +1,7 @@
 #include "../../include/results_queue/claim_result.h"
 
 // Function to claim result from results queue
-result_data_t* claim_result(results_queue_t* results_queue) {
+result_t* claim_result(results_queue_t* results_queue) {
         
     // Input validation
     if (!results_queue || !results_queue->lock || !results_queue->results || !results_queue->room_available) {
@@ -33,7 +33,7 @@ result_data_t* claim_result(results_queue_t* results_queue) {
     }
     
     // Get result from the queue and set the slot in the queue to NULL
-    result_data_t* result_data = results_queue->results[results_queue->front];
+    result_t* result = results_queue->results[results_queue->front];
     results_queue->results[results_queue->front] = NULL;
     
     // Decrement results queue size and update results queue front indedx
@@ -45,7 +45,7 @@ result_data_t* claim_result(results_queue_t* results_queue) {
         
         // Failed to signal room available
         fprintf(stderr, "Failed to claim result from results queue: failed to signal that room is available\n");
-        free_result_data(result_data); 
+        free_result(result); 
         pthread_mutex_unlock(results_queue->lock);
         return NULL;
     }
@@ -55,13 +55,13 @@ result_data_t* claim_result(results_queue_t* results_queue) {
         
         // Failed to release lock
         fprintf(stderr, "Failed to claim result from results queue: failed to release lock\n");
-        free_result_data(result_data); 
+        free_result(result); 
         pthread_mutex_unlock(results_queue->lock); 
         return NULL;
     }
         
     // Successfully claimed result 
-    return result_data;
+    return result;
 }
 
 // EOF

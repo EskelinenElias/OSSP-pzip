@@ -10,12 +10,12 @@ void* process_tasks(void* args) {
     free(args); 
             
     // Process tasks until a termination task is acquired
-    task_data_t* task_data = NULL; 
-    while ((task_data = claim_task(tasks_queue)) != NULL) {
+    task_t* task = NULL; 
+    while ((task = claim_task(tasks_queue)) != NULL) {
             
         // Process the current task 
-        result_data_t* result_data = NULL;
-        if (!(result_data = encode_data(task_data))) {
+        result_t* result = NULL;
+        if (!(result = encode_data(task))) {
             
             // Terminate the thread 
             fprintf(stderr, "Failed to complete task: error occurred during encoding"); 
@@ -23,16 +23,16 @@ void* process_tasks(void* args) {
         }; 
                         
         // Yield the result to the task_manager
-        if (yield_result(results_queue, result_data, task_data->reserved_index) != SUCCESS) {
+        if (yield_result(results_queue, result, task->reserved_index) != SUCCESS) {
             
             // Failed to yield result to task_manager
             fprintf(stderr, "Failed to complete task: failed to yield result\n"); 
-            free_result_data(result_data); 
+            free_result(result); 
             return NULL; 
         };
         
         // Free the memory allocated for the task 
-        if (free_task_data(task_data) != SUCCESS) {
+        if (free_task(task) != SUCCESS) {
             
             // Failed to free task
             fprintf(stderr, "Failed to complete task: failed to free task\n");

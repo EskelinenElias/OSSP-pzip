@@ -1,7 +1,7 @@
-#include "../../include/result_data/free_result_data.h"
+#include "../../include/result/free_result.h"
 
 // Function to free the memory allocated for a result data structure
-int free_result_data(result_data_t* result) {
+int free_result(result_t* result) {
     
     // Input validation
     if (!result) {

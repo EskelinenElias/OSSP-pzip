@@ -1,7 +1,7 @@
 #include "../../include/results_queue/yield_result.h"
 
 // Function to yield result to results queue
-int yield_result(results_queue_t* results_queue, result_data_t* result_data, size_t reserved_index) {
+int yield_result(results_queue_t* results_queue, result_t* result, size_t reserved_index) {
     
     // Input validation
     if (!results_queue || !results_queue->lock || !results_queue->result_available || reserved_index < 0) {
@@ -28,7 +28,7 @@ int yield_result(results_queue_t* results_queue, result_data_t* result_data, siz
     }
     
     // Add the result to the reserved spot and set it's status as completed
-    results_queue->results[reserved_index] = result_data; 
+    results_queue->results[reserved_index] = result; 
     results_queue->status_flags[reserved_index] = COMPLETED; 
     
     // Check if the result is at the front of the queue

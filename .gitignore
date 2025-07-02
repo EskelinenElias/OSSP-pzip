@@ -1,2 +1,5 @@
 *.txt
 *.log
+INSTRUCTIONS.md
+generate_data.py
+pzip

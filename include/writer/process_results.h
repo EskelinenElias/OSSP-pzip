@@ -4,15 +4,16 @@
 #include <stdio.h>
 #include <pthread.h>
 
-#include "../../include/constants.h"
-#include "../../include/result_data/result_data.h"
-#include "../../include/writer/handle_boundary.h"
-#include "../../include/writer/write_to_output.h"
-#include "../../include/file_manager/file_manager.h"
-#include "../../include/file_manager/unmap_next_file.h"
-#include "../../include/results_queue/results_queue.h"
-#include "../../include/results_queue/claim_result.h"
-#include "../../include/result_data/free_result_data.h"
+#include "../constants.h"
+#include "../result/result.h"
+#include "../file_manager/file_manager.h"
+#include "../file_manager/unmap_next_file.h"
+#include "../results_queue/results_queue.h"
+#include "../results_queue/claim_result.h"
+#include "../result/free_result.h"
+
+#include "handle_boundary.h"
+#include "write_to_output.h"
 
 // Structure to hold arguments for writer thread
 typedef struct {

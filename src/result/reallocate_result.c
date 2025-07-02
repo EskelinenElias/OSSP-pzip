@@ -1,7 +1,7 @@
-#include "../../include/result_data/reallocate_result_data.h"
+#include "../../include/result/reallocate_result.h"
 
 // Function to increase result data structure capacity
-int reallocate_result_data(result_data_t* result, size_t new_capacity) {
+int reallocate_result(result_t* result, size_t new_capacity) {
     
     // Input validation
     if (result == NULL || new_capacity < 0) {

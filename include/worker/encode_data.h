@@ -1,16 +1,16 @@
-#ifndef ENCODE_H
-#define ENCODE_H
+#ifndef ENCODE_DATA_H
+#define ENCODE_DATA_H
 
 #include "stdio.h"
 #include "stdlib.h"
 
-#include "../../include/task_data/task_data.h"
-#include "../../include/result_data/result_data.h"
-#include "../../include/result_data/init_result_data.h"
-#include "../../include/result_data/reallocate_result_data.h"
-#include "../../include/result_data/free_result_data.h"
+#include "../../include/task/task.h"
+#include "../../include/result/result.h"
+#include "../../include/result/init_result.h"
+#include "../../include/result/reallocate_result.h"
+#include "../../include/result/free_result.h"
 
 // Function to count run lengths for a input string
-result_data_t* encode_data(task_data_t* task_data);
+result_t* encode_data(task_t* task);
 
-#endif // ENCODE_H
+#endif // ENCODE_DATA_H

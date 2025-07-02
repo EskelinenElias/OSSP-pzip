@@ -1,12 +1,13 @@
-#ifndef TASK_DATA_H
-#define TASK_DATA_H
+#ifndef TASK_H
+#define TASK_H
 
 #include <stdio.h>
 
+// Structure to represent a task
 typedef struct {
     char* data; 
     size_t size;
     size_t reserved_index;
-} task_data_t;
+} task_t;
 
-#endif // TASK_DATA_H
+#endif // TASK_H

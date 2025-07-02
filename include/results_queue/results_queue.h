@@ -6,7 +6,7 @@
 #include <pthread.h>
 
 #include "../../include/constants.h"
-#include "../../include/result_data/result_data.h"
+#include "../../include/result/result.h"
 
 // Structure of the results queue
 typedef struct {
@@ -14,7 +14,7 @@ typedef struct {
     size_t front, rear, size, capacity;     // Queue management
     pthread_cond_t* room_available;         // Condition variable for signaling when there is room available in the queue
     pthread_cond_t* result_available;       // Condition variable for signaling when a result is available
-    result_data_t** results;                // Array of pointers to result data
+    result_t** results;                // Array of pointers to result data
     int* status_flags;                      // Array of status flags indicating the status of each result
 } results_queue_t;
 

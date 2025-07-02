@@ -1,5 +1,5 @@
-#ifndef RESULT_DATA_H
-#define RESULT_DATA_H
+#ifndef RESULT_H
+#define RESULT_H
 
 #include <stdlib.h>
 
@@ -7,6 +7,6 @@ typedef struct {
     char* characters; 
     size_t* counts; 
     size_t capacity;
-} result_data_t; 
+} result_t; 
 
-#endif // RESULT_DATA_H
+#endif // RESULT_H

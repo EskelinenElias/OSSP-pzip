@@ -3,8 +3,9 @@
 
 #include <stdlib.h>
 
-#include "../../include/tasks_queue/tasks_queue.h"
-#include "../../include/task_data/free_task_data.h"
+#include "../task/free_task.h"
+
+#include "tasks_queue.h"
 
 // Function to free tasks queue
 int free_tasks_queue(tasks_queue_t* tasks_queue);

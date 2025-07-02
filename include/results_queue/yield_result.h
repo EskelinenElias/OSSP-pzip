@@ -9,6 +9,6 @@
 #include "../../include/results_queue/results_queue.h"
 
 // Function to yield result to results queue
-int yield_result(results_queue_t* results_queue, result_data_t* result_data, size_t reserved_index); 
+int yield_result(results_queue_t* results_queue, result_t* result, size_t reserved_index); 
 
 #endif // YIELD_RESULT_H

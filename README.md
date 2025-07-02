@@ -34,9 +34,9 @@ The main function parses and validates the input arguments, initializes all need
 
 The file manager handles memory mapping the input files. It ensures, that already mapped files are not mapped again and that files are not unmapped too early. This is achieved by using a mapped file queue, where new files are added to the end of the queue, and files are unmapped from the front of the queue. New files are compared to the files in the queue to avoid trying to map them again. File manager also ensures, that all opened files are closed when the program exits.
 
-## The task data structure
+## The task structure
 
-The task data structure contains a pointer to the input data (a memory mapped file), the size of the input data to process and a reserved index to the results queue, which is used when yielding the result of the task to the results queue. 
+The task structure contains a pointer to the input data (a memory mapped file), the size of the input data to process and a reserved index to the results queue, which is used when yielding the result of the task to the results queue. 
 
 ## The tasks queue
 
@@ -44,7 +44,7 @@ The tasks queue manages encoding tasks and makes sure they are claimed in the co
 
 ## The worker threads
 
-The worker threads process the tasks in the tasks queue and then yield the results to the results queue, to the reserved index which is part of the task data. The worker claims a task from the tasks queue, encodes the data, and yields the result to the results queue. The thread will terminate upon error or when it claims a NULL task.
+The worker threads process the tasks in the tasks queue and then yield the results to the results queue, to the reserved index which is part of the task. The worker claims a task from the tasks queue, encodes the data, and yields the result to the results queue. The thread will terminate upon error or when it claims a NULL task.
 
 ## The result data structure
 

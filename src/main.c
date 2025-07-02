@@ -33,36 +33,27 @@ int main(int argc, char *argv[]) {
             return ERROR; 
         }
                                 
-        // Yield task data to task manager until end of file is reached
+        // Yield task to task manager until end of file is reached
         for (size_t t = 0; t < current_file->size; t += TASK_SIZE) {
             
-            // Get pointer to task data and task size 
+            // Get pointer to task and task size 
             char* data = current_file->data + t; 
             size_t size = fmin(TASK_SIZE, current_file->size - t); 
             
-            // Reserve spot in results queue
-            size_t reserved_index = reserve_spot(process->results_queue); 
-            if (reserved_index < 0) {
+            // Initialize task
+            task_t* task = init_task(data, size, process->results_queue);
+            if (!task) {
                 
-                // Failed to reserve spot in results queue
+                // Failed to initialize task
                 free_process(process);
                 return ERROR;
             }
             
-            // Initialize task data
-            task_data_t* task_data = init_task_data(data, size, reserved_index);
-            if (!task_data) {
+            // Yield task to task manager
+            if (yield_task(process->tasks_queue, task) != SUCCESS) {
                 
-                // Failed to initialize task data
-                free_process(process);
-                return ERROR;
-            }
-            
-            // Yield task data to task manager
-            if (yield_task(process->tasks_queue, task_data) != SUCCESS) {
-                
-                // Failed to yield task data to task manager
-                free_task_data(task_data); 
+                // Failed to yield task to task manager
+                free_task(task); 
                 free_process(process);
                 return ERROR; 
             }
