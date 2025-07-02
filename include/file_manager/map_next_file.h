@@ -1,6 +1,12 @@
 #ifndef MAP_NEXT_FILE_H
 #define MAP_NEXT_FILE_H
 
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <stddef.h>
+#include <fcntl.h>
+#include <unistd.h>
+
 #include "../../include/constants.h"
 #include "../../include/file_manager/file_manager.h"
 #include "../../include/file_manager/mapped_file.h"

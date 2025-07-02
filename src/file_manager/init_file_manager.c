@@ -1,5 +1,6 @@
 #include "../../include/file_manager/init_file_manager.h"
 
+// Function to initialize file manager
 file_manager_t* init_file_manager(size_t capacity) {
     
     // Input validation
