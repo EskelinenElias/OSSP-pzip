@@ -19,9 +19,10 @@ int free_file_manager(file_manager_t* file_manager) {
             
             // Get mapped file
             mapped_file_t* mapped_file = file_manager->mapped_file_queue[i]; 
+            if (!mapped_file) continue;
             
             // Unmap file data
-            if (munmap(mapped_file->data, mapped_file->size) != SUCCESS) {
+            if (mapped_file->data && munmap(mapped_file->data, mapped_file->size) != SUCCESS) {
                 
                 // Failed to unmap file
                 fprintf(stderr, "Failed to unmap next file: failed to unmap file data from memory\n");
@@ -29,7 +30,7 @@ int free_file_manager(file_manager_t* file_manager) {
             }
             
             // Close the file
-            if (close(mapped_file->file) != SUCCESS) {
+            if (mapped_file->file != -1 && close(mapped_file->file) != SUCCESS) {
                 
                 // Failed to close file
                 fprintf(stderr, "Failed to unmap next file: failed to close file\n");

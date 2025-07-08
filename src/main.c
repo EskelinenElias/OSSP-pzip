@@ -58,16 +58,25 @@ int main(int argc, char *argv[]) {
                 return ERROR; 
             }
         }
+        
+        // Initialize EOF task
+        task_t* EOF_task = init_task(NULL, 0, process->results_queue);
+        if (!EOF_task) {
+            
+            // Failed to initialize task
+            free_process(process);
+            return ERROR;
+        }
                                         
         // Yield EOF task to task manager (writer thread will tell file manager to unmap and close the next file in queue when it encounters this)
-        if (yield_task(process->tasks_queue, NULL) != SUCCESS) {
+        if (yield_task(process->tasks_queue, EOF_task) != SUCCESS) {
             
             // Failed to yield EOF task to task task_manager
             free_process(process);
             return ERROR; 
         }
     }
-    
+        
     // Cleanup routine
     if (free_process(process) != SUCCESS) {
         

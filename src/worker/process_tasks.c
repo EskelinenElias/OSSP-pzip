@@ -2,7 +2,7 @@
 
 // Thread worker function
 void* process_tasks(void* args) {
-    
+        
     // Cast arguments
     worker_args_t* worker_args = (worker_args_t*) args;
     tasks_queue_t* tasks_queue = worker_args->tasks_queue;

@@ -2,7 +2,7 @@
 
 // Function to claim result from results queue
 result_t* claim_result(results_queue_t* results_queue) {
-        
+            
     // Input validation
     if (!results_queue || !results_queue->lock || !results_queue->results || !results_queue->room_available) {
         
@@ -35,6 +35,7 @@ result_t* claim_result(results_queue_t* results_queue) {
     // Get result from the queue and set the slot in the queue to NULL
     result_t* result = results_queue->results[results_queue->front];
     results_queue->results[results_queue->front] = NULL;
+    results_queue->status_flags[results_queue->front] = EMPTY;
     
     // Decrement results queue size and update results queue front indedx
     results_queue->front = (results_queue->front + 1) % results_queue->capacity;

@@ -2,7 +2,7 @@
 
 // Writer loop
 void* process_results(void* args) {
-    
+        
     // Cast arguments
     writer_args_t* writer_args = (writer_args_t*)args;
     file_manager_t* file_manager = writer_args->file_manager;
@@ -87,7 +87,7 @@ void* process_results(void* args) {
         if (current_result) free_result(current_result);
         current_result = NULL;
     }
-    
+        
     // Successfully completed writing all results to output stream
     return NULL; 
 }

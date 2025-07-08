@@ -2,7 +2,7 @@
 
 // Function to yield result to results queue
 int yield_result(results_queue_t* results_queue, result_t* result, size_t reserved_index) {
-    
+        
     // Input validation
     if (!results_queue || !results_queue->lock || !results_queue->result_available || reserved_index < 0) {
         
@@ -20,7 +20,7 @@ int yield_result(results_queue_t* results_queue, result_t* result, size_t reserv
     }
     
     // Check that the reserved index is actually empty
-    if (results_queue->results[reserved_index] != NULL || results_queue->status_flags[reserved_index] == COMPLETED) {
+    if (results_queue->results[reserved_index] != NULL || results_queue->status_flags[reserved_index] != RESERVED) {
         
         // Reserved spot is not empty
         fprintf(stderr, "Failed to yield result to results queue: something went wrong\n"); 
@@ -31,18 +31,14 @@ int yield_result(results_queue_t* results_queue, result_t* result, size_t reserv
     results_queue->results[reserved_index] = result; 
     results_queue->status_flags[reserved_index] = COMPLETED; 
     
-    // Check if the result is at the front of the queue
-    if (reserved_index == results_queue->front) {
-    
-        // Signal that the next result is available
-        if (pthread_cond_signal(results_queue->result_available) != SUCCESS) {
-            
-            // Failed to signal that the next result is available
-            fprintf(stderr, "Failed to yield result to results queue: failed to signal that the next result is available\n");
-            results_queue->results[reserved_index] = NULL; 
-            pthread_mutex_unlock(results_queue->lock);
-            return ERROR;
-        }
+    // Signal that the next result is available
+    if (reserved_index == results_queue->front && pthread_cond_signal(results_queue->result_available) != 0) {
+        
+        // Failed to signal that the next result is available
+        fprintf(stderr, "Failed to yield result to results queue: failed to signal that the next result is available\n");
+        results_queue->results[reserved_index] = NULL; 
+        pthread_mutex_unlock(results_queue->lock);
+        return ERROR;
     }
     
     // Release the lock

@@ -24,21 +24,23 @@ int unmap_next_file(file_manager_t* file_manager) {
     if (mapped_file) {
         
         // Unmap the file from memory
-        if (munmap(mapped_file->data, mapped_file->size) != SUCCESS) {
+        if (mapped_file->data && munmap(mapped_file->data, mapped_file->size) != SUCCESS) {
             
             // Failed to unmap file
             fprintf(stderr, "Failed to unmap next file: failed to unmap file data from memory\n");
             close(mapped_file->file);
             free(mapped_file); 
+            pthread_mutex_unlock(file_manager->lock); 
             return ERROR; 
         }
         
         // Close the file
-        if (close(mapped_file->file) != SUCCESS) {
+        if (mapped_file->file != -1 && close(mapped_file->file) != SUCCESS) {
             
             // Failed to close file
             fprintf(stderr, "Failed to unmap next file: failed to close file\n");
             free(mapped_file); 
+            pthread_mutex_unlock(file_manager->lock); 
             return ERROR; 
         }
         

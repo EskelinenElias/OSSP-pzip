@@ -14,14 +14,14 @@
 #define ERROR 1
 
 // Define encoding result status codes
-#define COMPLETED 1
-#define FAILED 2
-#define PENDING 0
+#define COMPLETED 2
+#define RESERVED 1
+#define EMPTY 0
 
 // Parallel processing constants
-#define TASK_SIZE 1024
-#define MAX_THREADS 128
-#define MAX_CAPACITY 1000
+#define TASK_SIZE 10
+#define MAX_THREADS 0
+#define MAX_CAPACITY 10
 
 // Get the number of available CPU cores
 static inline size_t get_num_cores() {

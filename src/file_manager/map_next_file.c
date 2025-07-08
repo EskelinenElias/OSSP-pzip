@@ -26,6 +26,14 @@ mapped_file_t* map_next_file(file_manager_t* file_manager, const char *filepath)
         fprintf(stderr, "Failed to map file: file manager is full\n");
         return NULL;
     }
+    
+    // Check that the file exists
+    if (access(filepath, F_OK) == -1) {
+        
+        // File does not exist
+        fprintf(stderr, "Failed to map file: file does not exist\n");
+        return NULL;
+    }
             
     // Get file stats and check for errors
     struct stat file_stat;

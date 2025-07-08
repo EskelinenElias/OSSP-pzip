@@ -36,7 +36,7 @@ size_t reserve_spot(results_queue_t* results_queue) {
     size_t reserved_index = results_queue->rear; 
     
     // Check that the reserved spot is actually empty
-    if (results_queue->results[reserved_index]) {
+    if (results_queue->results[reserved_index] != NULL || results_queue->status_flags[reserved_index] != EMPTY) {
         
         // The reserved index is not empty
         fprintf(stderr, "Failed to reserve spot: something went wrong\n"); 
@@ -47,7 +47,7 @@ size_t reserve_spot(results_queue_t* results_queue) {
     
     // Initialize the result and it's status flag
     results_queue->results[reserved_index] = NULL; 
-    results_queue->status_flags[reserved_index] = PENDING; 
+    results_queue->status_flags[reserved_index] = RESERVED; 
     
     // Increment queue size and update rear index
     results_queue->size++;

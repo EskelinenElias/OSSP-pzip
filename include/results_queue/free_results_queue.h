@@ -1,6 +1,8 @@
 #ifndef FREE_RESULTS_QUEUE_H
 #define FREE_RESULTS_QUEUE_H
 
+#include "../result/free_result.h"
+
 #include "results_queue.h"
 
 // Function to free results queue

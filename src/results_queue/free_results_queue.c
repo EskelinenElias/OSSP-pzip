@@ -35,8 +35,18 @@ int free_results_queue(results_queue_t* results_queue) {
         free(results_queue->result_available);
     }
     
+    // Free any remaining results
+    for (size_t i = 0; i < results_queue->capacity; i++) {
+        
+        // If the result exists, free it
+        if (results_queue->results[i]) free_result(results_queue->results[i]);
+    }
+    
     // Free memory allocated for results
     if (results_queue->results) free(results_queue->results);
+    
+    // Free memory allocated for status flags
+    if (results_queue->status_flags) free(results_queue->status_flags);
     
     // Free memory allocated for results queue structure
     free(results_queue); 
