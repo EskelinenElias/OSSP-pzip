@@ -25,8 +25,11 @@ process_vars_t* init_process(size_t num_cores, size_t num_files) {
     process->tasks_queue = NULL;
     process->results_queue = NULL; 
     process->workers = NULL; 
-    process->num_workers = num_cores; 
+    process->num_workers = fmax(fmin(get_num_cores(), MAX_THREADS - 2), 1); 
     process->writer = NULL;
+    
+    /* NOTE: The number of workers needs to be at least 1, and at max MAX_THREADS - 2 
+    (because the main thread and writer thread need to also be accounted for*/
     
     // Initialize file manager and check for errors
     if (!(process->file_manager = init_file_manager(num_files))) {

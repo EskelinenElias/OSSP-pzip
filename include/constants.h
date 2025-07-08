@@ -13,7 +13,7 @@
 #define FAILURE 2
 #define ERROR 1
 
-// Encoding task status codes
+// Define encoding result status codes
 #define COMPLETED 1
 #define FAILED 2
 #define PENDING 0
@@ -25,8 +25,9 @@
 
 // Get the number of available CPU cores
 static inline size_t get_num_cores() {
-    size_t num_cores = fmin(sysconf(_SC_NPROCESSORS_ONLN), MAX_THREADS);
-    return (num_cores > 0) ? num_cores : 1;
+    
+    // Determine the number of available CPU cores
+    return sysconf(_SC_NPROCESSORS_ONLN);
 }
 
 #endif // CONSTANTS_H
