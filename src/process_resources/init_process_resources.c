@@ -1,7 +1,7 @@
-#include "../../include/process/init_process.h"
+#include "../../include/process_resources/init_process_resources.h"
 
 // Function to initialize process variables
-process_vars_t* init_process(size_t num_cores, size_t num_files) {
+process_resources_t* init_process_resources(size_t num_cores, size_t num_files) {
         
     // Input validation
     if (num_cores < 1 || num_files < 1) {
@@ -12,7 +12,7 @@ process_vars_t* init_process(size_t num_cores, size_t num_files) {
     }
     
     // Allocate memory for process variables and check for errors
-    process_vars_t* process = (process_vars_t*)malloc(sizeof(process_vars_t));
+    process_resources_t* process = (process_resources_t*)malloc(sizeof(process_resources_t));
     if (!process) {
         
         // Failed to allocate memory for process
@@ -36,7 +36,7 @@ process_vars_t* init_process(size_t num_cores, size_t num_files) {
         
         // Failed to initialize file manager
         fprintf(stderr, "Failed to initialize process: failed to initialize file manager\n");
-        free_process(process); 
+        free_process_resources(process); 
         return NULL;
     }
     
@@ -45,7 +45,7 @@ process_vars_t* init_process(size_t num_cores, size_t num_files) {
         
         // Failed to initialize task task_manager
         fprintf(stderr, "Failed to initialize process: failed to initialize tasks queue\n");
-        free_process(process); 
+        free_process_resources(process); 
         return NULL;
     }
     
@@ -54,7 +54,7 @@ process_vars_t* init_process(size_t num_cores, size_t num_files) {
         
         // Failed to initialize task task_manager
         fprintf(stderr, "Failed to initialize process: failed to initialize results queue\n");
-        free_process(process); 
+        free_process_resources(process); 
         return NULL;
     }
     
@@ -63,7 +63,7 @@ process_vars_t* init_process(size_t num_cores, size_t num_files) {
         
         // Failed to allocate memory for workers
         fprintf(stderr, "Failed to initialize process: failed to allocate memory for workers\n");
-        free_process(process); 
+        free_process_resources(process); 
         return NULL;
     }
     
@@ -75,7 +75,7 @@ process_vars_t* init_process(size_t num_cores, size_t num_files) {
             
             // Failed to initialize worker
             fprintf(stderr, "Failed to initialize process: failed to initialize worker %zu\n", i);
-            free_process(process); 
+            free_process_resources(process); 
             return NULL;
         }
     }
@@ -85,7 +85,7 @@ process_vars_t* init_process(size_t num_cores, size_t num_files) {
         
         // Failed to initialize writer
         fprintf(stderr, "Failed to initialize process: failed to initialize writer\n");
-        free_process(process); 
+        free_process_resources(process); 
         return NULL;
     }
         

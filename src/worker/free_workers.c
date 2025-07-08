@@ -1,13 +1,13 @@
-#include "../../include/worker/terminate_workers.h"
+#include "../../include/worker/free_workers.h"
 
-// Function to terminate workers
-int terminate_workers(pthread_t** workers, size_t num_workers, tasks_queue_t* tasks_queue) {
+// Function to free workers
+int free_workers(pthread_t** workers, size_t num_workers, tasks_queue_t* tasks_queue) {
     
     // Input validation
     if (!workers || num_workers <= 0) {
         
         // Invalid input
-        fprintf(stderr, "Failed to terminate workers: invalid input\n");
+        fprintf(stderr, "Failed to free workers: invalid input\n");
         return ERROR;
     }
     
@@ -26,7 +26,7 @@ int terminate_workers(pthread_t** workers, size_t num_workers, tasks_queue_t* ta
             if (yield_task(tasks_queue, NULL) != SUCCESS) {
                 
                 // Failed to yield task
-                fprintf(stderr, "Failed to terminate workers: failed to yield task\n");
+                fprintf(stderr, "Failed to free workers: failed to yield task\n");
                 return ERROR;
             };
         }
@@ -42,7 +42,7 @@ int terminate_workers(pthread_t** workers, size_t num_workers, tasks_queue_t* ta
     // Free memory allocated for workers
     for (size_t i = 0; i < num_workers; ++i) free(workers[i]);
 
-    // Successfully terminated workers
+    // Successfully freed workers
     return SUCCESS;
 }
 

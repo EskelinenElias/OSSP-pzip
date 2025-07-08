@@ -1,13 +1,13 @@
-#include "../../include/process/free_process.h"
+#include "../../include/process_resources/free_process_resources.h"
 
 // Function to free process variables
-int free_process(process_vars_t* process) {
+int free_process_resources(process_resources_t* process) {
         
     // Terminate workers
-    if (process->workers && process->num_workers > 0) terminate_workers(process->workers, process->num_workers, process->tasks_queue);
+    if (process->workers) free_workers(process->workers, process->num_workers, process->tasks_queue);
     
     // Terminate writer thread
-    if (process->writer) terminate_writer(process->writer, process->results_queue);
+    if (process->writer) free_writer(process->writer, process->results_queue);
     
     // Free tasks queue
     if (process->tasks_queue) free_tasks_queue(process->tasks_queue);

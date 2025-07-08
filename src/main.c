@@ -14,8 +14,8 @@ int main(int argc, char *argv[]) {
     // Initialize process variables
     size_t num_cores = get_num_cores();
     size_t num_files = argc - 1; 
-    process_vars_t* process = init_process(num_cores, num_files); 
-    if (!process) {
+    process_resources_t* resources = init_process_resources(num_cores, num_files); 
+    if (!resources) {
         
         // Failed to initialize process variables
         return ERROR; 
@@ -25,11 +25,11 @@ int main(int argc, char *argv[]) {
     for (size_t i = 0; i < num_files; i++) {
         
         // Map a new file to memory
-        mapped_file_t* current_file = map_next_file(process->file_manager, argv[i + 1]); 
+        mapped_file_t* current_file = map_next_file(resources->file_manager, argv[i + 1]); 
         if (!current_file) {
             
             // Failed to map file 
-            free_process(process); 
+            free_process_resources(resources); 
             return ERROR; 
         }
                                 
@@ -41,44 +41,44 @@ int main(int argc, char *argv[]) {
             size_t size = fmin(TASK_SIZE, current_file->size - t); 
             
             // Initialize task
-            task_t* task = init_task(data, size, process->results_queue);
+            task_t* task = init_task(data, size, resources->results_queue);
             if (!task) {
                 
                 // Failed to initialize task
-                free_process(process);
+                free_process_resources(resources);
                 return ERROR;
             }
             
             // Yield task to task manager
-            if (yield_task(process->tasks_queue, task) != SUCCESS) {
+            if (yield_task(resources->tasks_queue, task) != SUCCESS) {
                 
                 // Failed to yield task to task manager
                 free_task(task); 
-                free_process(process);
+                free_process_resources(resources);
                 return ERROR; 
             }
         }
         
         // Initialize EOF task
-        task_t* EOF_task = init_task(NULL, 0, process->results_queue);
+        task_t* EOF_task = init_task(NULL, 0, resources->results_queue);
         if (!EOF_task) {
             
             // Failed to initialize task
-            free_process(process);
+            free_process_resources(resources);
             return ERROR;
         }
                                         
         // Yield EOF task to task manager (writer thread will tell file manager to unmap and close the next file in queue when it encounters this)
-        if (yield_task(process->tasks_queue, EOF_task) != SUCCESS) {
+        if (yield_task(resources->tasks_queue, EOF_task) != SUCCESS) {
             
             // Failed to yield EOF task to task task_manager
-            free_process(process);
+            free_process_resources(resources);
             return ERROR; 
         }
     }
         
     // Cleanup routine
-    if (free_process(process) != SUCCESS) {
+    if (free_process_resources(resources) != SUCCESS) {
         
         // Failed to clean up process
         return ERROR; 

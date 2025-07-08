@@ -7,8 +7,8 @@
 #include <math.h>
 
 #include "../include/constants.h"
-#include "../include/process/init_process.h"
-#include "../include/process/free_process.h"
+#include "../include/process_resources/init_process_resources.h"
+#include "../include/process_resources/free_process_resources.h"
 #include "../include/file_manager/map_next_file.h"
 #include "../include/task/task.h"
 #include "../include/task/init_task.h"
