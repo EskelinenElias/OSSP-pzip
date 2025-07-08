@@ -12,7 +12,7 @@ tasks_queue_t* init_tasks_queue(size_t capacity) {
     }
     
     // Allocate memory for tasks queue structure and check for errors
-    tasks_queue_t* tasks_queue = (tasks_queue_t*)malloc(sizeof(tasks_queue_t)); 
+    tasks_queue_t* tasks_queue = calloc(1, sizeof(tasks_queue_t)); 
     if (!tasks_queue) {
         
         // Failed to allocate memory for tasks queue structure
@@ -31,7 +31,7 @@ tasks_queue_t* init_tasks_queue(size_t capacity) {
     tasks_queue->lock = NULL; 
     
     // Allocate memory for tasks
-    if (!(tasks_queue->tasks = (task_t**)malloc(sizeof(task_t*) * capacity))) {
+    if (!(tasks_queue->tasks = calloc(capacity, sizeof(task_t*)))) {
         
         // Failed to allocate memory for tasks
         fprintf(stderr, "Failed to initialize tasks queue: failed to allocate memory for tasks\n");
@@ -41,7 +41,7 @@ tasks_queue_t* init_tasks_queue(size_t capacity) {
     for (size_t i = 0; i < capacity; i++) tasks_queue->tasks[i] = NULL;
     
     // Allocate memory for mutex lock 
-    if (!(tasks_queue->lock = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t)))) {
+    if (!(tasks_queue->lock = calloc(1, sizeof(pthread_mutex_t)))) {
         
         // Failed to allocate memory for tasks_queue lock; perform cleanup routine and return
         fprintf(stderr, "Failed to initialize tasks queue: failed to allocate memory for mutex lock\n");
@@ -60,7 +60,7 @@ tasks_queue_t* init_tasks_queue(size_t capacity) {
     };
     
     // Allocate memory for condition variable
-    if (!(tasks_queue->room_available = (pthread_cond_t*)malloc(sizeof(pthread_cond_t)))) {
+    if (!(tasks_queue->room_available = calloc(1, sizeof(pthread_cond_t)))) {
         
         // Failed to allocate memory for condition variable
         fprintf(stderr, "Failed to initialize tasks queue: failed to allocate memory for condition variable\n");
@@ -79,7 +79,7 @@ tasks_queue_t* init_tasks_queue(size_t capacity) {
     }
     
     // Allocate memory for condition variable
-    if (!(tasks_queue->tasks_available = (pthread_cond_t*)malloc(sizeof(pthread_cond_t)))) {
+    if (!(tasks_queue->tasks_available = calloc(1, sizeof(pthread_cond_t)))) {
         
         // Failed to allocate memory for condition variable
         fprintf(stderr, "Failed to initialize tasks queue: failed to allocate memory for condition variable\n");

@@ -5,6 +5,7 @@ int free_process_resources(process_resources_t* process) {
         
     // Terminate workers
     if (process->workers) free_workers(process->workers, process->num_workers, process->tasks_queue);
+    free(process->workers);
     
     // Terminate writer thread
     if (process->writer) free_writer(process->writer, process->results_queue);

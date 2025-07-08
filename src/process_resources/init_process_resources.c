@@ -59,7 +59,7 @@ process_resources_t* init_process_resources(size_t num_cores, size_t num_files) 
     }
     
     // Allocate memory for workers and check for errors
-    if (!(process->workers = (pthread_t**)malloc(sizeof(pthread_t*) * process->num_workers))) {
+    if (!(process->workers = calloc(process->num_workers, sizeof(pthread_t*)))) {
         
         // Failed to allocate memory for workers
         fprintf(stderr, "Failed to initialize process: failed to allocate memory for workers\n");

@@ -12,7 +12,7 @@ results_queue_t* init_results_queue(size_t capacity) {
     }
     
     // Allocate memory for results queue structure and check for errors
-    results_queue_t* results_queue = (results_queue_t*)malloc(sizeof(results_queue_t)); 
+    results_queue_t* results_queue = calloc(1,sizeof(results_queue_t)); 
     if (!results_queue) {
         
         // Failed to allocate memory for results queue structure
@@ -31,17 +31,16 @@ results_queue_t* init_results_queue(size_t capacity) {
     results_queue->lock = NULL; 
     
     // Allocate memory for results
-    if (!(results_queue->results = (result_t**)malloc(sizeof(result_t*) * capacity))) {
+    if (!(results_queue->results = calloc(capacity, sizeof(result_t*)))) {
         
         // Failed to allocate memory for results
         fprintf(stderr, "Failed to initialize results queue: failed to allocate memory for results\n");
         free_results_queue(results_queue);
         return NULL; 
     }
-    for (size_t i = 0; i < capacity; i++) results_queue->results[i] = NULL;
     
     // Allocate memory for status_flags
-    if (!(results_queue->status_flags = (int*)malloc(sizeof(int) * capacity))) {
+    if (!(results_queue->status_flags = calloc(capacity, sizeof(int)))) {
         
         // Failed to allocate memory for results
         fprintf(stderr, "Failed to initialize results queue: failed to allocate memory for status_flags\n");
@@ -51,7 +50,7 @@ results_queue_t* init_results_queue(size_t capacity) {
     for (size_t i = 0; i < capacity; i++) results_queue->status_flags[i] = EMPTY;
     
     // Allocate memory for mutex lock 
-    if (!(results_queue->lock = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t)))) {
+    if (!(results_queue->lock = calloc(1, sizeof(pthread_mutex_t)))) {
         
         // Failed to allocate memory for results_queue lock; perform cleanup routine and return
         fprintf(stderr, "Failed to initialize results queue: failed to allocate memory for mutex lock\n");
@@ -70,7 +69,7 @@ results_queue_t* init_results_queue(size_t capacity) {
     };
     
     // Allocate memory for condition variable
-    if (!(results_queue->room_available = (pthread_cond_t*)malloc(sizeof(pthread_cond_t)))) {
+    if (!(results_queue->room_available = calloc(1, sizeof(pthread_cond_t)))) {
         
         // Failed to allocate memory for condition variable
         fprintf(stderr, "Failed to initialize results queue: failed to allocate memory for condition variable\n");
@@ -89,7 +88,7 @@ results_queue_t* init_results_queue(size_t capacity) {
     }
     
     // Allocate memory for condition variable
-    if (!(results_queue->result_available = (pthread_cond_t*)malloc(sizeof(pthread_cond_t)))) {
+    if (!(results_queue->result_available = calloc(1, sizeof(pthread_cond_t)))) {
         
         // Failed to allocate memory for condition variable
         fprintf(stderr, "Failed to initialize results queue: failed to allocate memory for condition variable\n");
