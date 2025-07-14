@@ -41,7 +41,7 @@ process_resources_t* init_process_resources(size_t num_cores, size_t num_files) 
     }
     
     // Initialize tasks queue and check for errors
-    if (!(process->tasks_queue = init_tasks_queue(MAX_CAPACITY))) {
+    if (!(process->tasks_queue = init_tasks_queue(QUEUE_CAPACITY))) {
         
         // Failed to initialize task task_manager
         fprintf(stderr, "Failed to initialize process: failed to initialize tasks queue\n");
@@ -50,7 +50,7 @@ process_resources_t* init_process_resources(size_t num_cores, size_t num_files) 
     }
     
     // Initialize results queue and check for errors
-    if (!(process->results_queue = init_results_queue(MAX_CAPACITY))) {
+    if (!(process->results_queue = init_results_queue(QUEUE_CAPACITY))) {
         
         // Failed to initialize task task_manager
         fprintf(stderr, "Failed to initialize process: failed to initialize results queue\n");

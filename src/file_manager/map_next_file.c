@@ -48,8 +48,11 @@ mapped_file_t* map_next_file(file_manager_t* file_manager, const char *filepath)
     mapped_file_t* mapped_file = NULL; 
     for (size_t i = 0; i < file_manager->capacity; i++) {
         
+        // Get the next mapped file from the queue
+        mapped_file = file_manager->mapped_file_queue[i];
+        
         // Get the next pointer from the queue and continue if it is NULL
-        if (!(mapped_file = file_manager->mapped_file_queue[i])) continue;
+        if (!mapped_file) continue;
                 
         // Compare file stats
         if (mapped_file->st_ino == file_stat.st_ino && mapped_file->st_dev == file_stat.st_dev) {

@@ -1,0 +1,21 @@
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==24798==ERROR: AddressSanitizer: SEGV on unknown address 0xffffd847d7d9d7d8 (pc 0x000102ea936c bp 0x00016cf5ef40 sp 0x00016cf5eb40 T0)
+==24798==The signal is caused by a READ memory access.
+    #0 0x000102ea936c in map_next_file map_next_file.c:58
+    #1 0x000102ea7f88 in main main.c:28
+    #2 0x0001974b2b94 in start+0x17b8 (dyld:arm64e+0xfffffffffff3ab94)
+
+==24798==Register values:
+ x[0] = 0x0000000000000000   x[1] = 0x0000000000000012   x[2] = 0x000000019784eb1c   x[3] = 0x000000016cf5e468  
+ x[4] = 0x00000000090008ff   x[5] = 0x0000000000000003   x[6] = 0x0000000000000000   x[7] = 0x0000000000000000  
+ x[8] = 0x17d7d847d7d9d7d8   x[9] = 0xbebebebebebebec6  x[10] = 0x0000000000000000  x[11] = 0x0000000000000000  
+x[12] = 0x000000702da0bd78  x[13] = 0xffffff8fd25f428f  x[14] = 0x000000702da0bd6c  x[15] = 0x000000000000000f  
+x[16] = 0x0000000000000152  x[17] = 0x000000010361c840  x[18] = 0x0000000000000000  x[19] = 0x000000016cf5ec40  
+x[20] = 0x00000002056e4018  x[21] = 0x000000016cf5f128  x[22] = 0x0fffffff0009d5d6  x[23] = 0x00000002056e4018  
+x[24] = 0x00000002056e4150  x[25] = 0x000000016cf5f290  x[26] = 0x0000000000000000  x[27] = 0x0000000000000000  
+x[28] = 0x0000000000000000     fp = 0x000000016cf5ef40     lr = 0x0000000102ea9208     sp = 0x000000016cf5eb40  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV map_next_file.c:58 in map_next_file
+==24798==ABORTING
+./tester/run-tests.sh: line 27: 24798 Abort trap: 6           ./pzip tests/1.in
