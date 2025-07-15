@@ -12,26 +12,16 @@
 #include "../results_queue/claim_result.h"
 #include "../result/free_result.h"
 
+#include "writer_thread_resources.h"
 #include "handle_boundary.h"
 #include "write_to_output.h"
-
-// Structure to represent writer resources
-typedef struct {
-    result_t* current_result;
-    result_t* next_result;
-} writer_resources_t;
 
 // Structure to represent writer arguments
 typedef struct {
     file_manager_t* file_manager;
     results_queue_t* results_queue;
+    writer_thread_resources_t* resources; 
 } writer_args_t;
-
-// Function to initialize writer resources
-writer_resources_t* init_writer_resources();
-
-// Function to free writer resources
-int free_writer_resources(writer_resources_t* resources);
 
 // Function to process results (in a writer thread)
 void* process_results(void* args); 

@@ -7,7 +7,7 @@
 #include "../tasks_queue/free_tasks_queue.h"
 #include "../results_queue/free_results_queue.h"
 #include "../worker/free_workers.h"
-#include "../writer/free_writer.h"
+#include "../writer/free_writer_thread.h"
 
 #include "process_resources.h"
 

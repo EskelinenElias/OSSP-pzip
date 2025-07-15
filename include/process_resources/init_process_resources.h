@@ -7,7 +7,7 @@
 #include "../tasks_queue/init_tasks_queue.h"
 #include "../results_queue/init_results_queue.h"
 #include "../worker/init_worker.h"
-#include "../writer/init_writer.h"
+#include "../writer/init_writer_thread.h"
 
 #include "process_resources.h"
 #include "free_process_resources.h"

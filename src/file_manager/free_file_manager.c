@@ -2,7 +2,7 @@
 
 // Function to free file manager
 int free_file_manager(file_manager_t* file_manager) {
-    
+        
     // Input validation
     if (!file_manager) {
         

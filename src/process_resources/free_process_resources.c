@@ -8,7 +8,7 @@ int free_process_resources(process_resources_t* process) {
     free(process->workers);
     
     // Terminate writer thread
-    if (process->writer) free_writer(process->writer, process->results_queue);
+    if (process->writer) free_writer_thread(process->writer, process->results_queue);
     
     // Free tasks queue
     if (process->tasks_queue) free_tasks_queue(process->tasks_queue);

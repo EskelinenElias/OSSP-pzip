@@ -1,43 +1,5 @@
 #include "../../include/writer/process_results.h"
 
-// Function to initialize writer resources
-writer_resources_t* init_writer_resources() {
-    
-    // Allocate memory for writer resources
-    writer_resources_t* resources = calloc(1, sizeof(writer_resources_t));
-    if (!resources) {
-        
-        // Failed to allocate memory for writer resources
-        fprintf(stderr, "Failed to initialize writer resources: failed to allocate memory for writer resources\n");
-        return NULL;
-    }
-    
-    // Successfully allocated memory for writer resources
-    return resources;
-}
-
-// Function to free writer resources
-int free_writer_resources(writer_resources_t* resources) {
-    
-    // Input validation
-    if (!resources) {
-        
-        // Invalid input
-        fprintf(stderr, "Failed to free writer resources: invalid input\n");
-        return ERROR;
-    }
-    
-    // Free memory allocated for writer resources
-    if (resources->current_result) free_result(resources->current_result); 
-    if (resources->next_result) free_result(resources->next_result);
-    
-    // Free memory allocated for writer resources structure
-    free(resources);
-    
-    // Successfully freed memory for writer resources
-    return SUCCESS;
-}
-
 // Writer loop
 void* process_results(void* args) {
         
@@ -51,7 +13,7 @@ void* process_results(void* args) {
     
     // Parse arguments
     writer_args_t* writer_args = (writer_args_t*)args;
-    if (!writer_args->results_queue || !writer_args->file_manager) {
+    if (!writer_args->results_queue || !writer_args->file_manager || !writer_args->resources) {
         
         // Failed to parse argument
         fprintf(stderr, "Failed to process results: missing required arguments\n");
@@ -59,16 +21,8 @@ void* process_results(void* args) {
     }
     results_queue_t* results_queue = writer_args->results_queue;
     file_manager_t* file_manager = writer_args->file_manager;
+    writer_thread_resources_t* resources = writer_args->resources;
     free(writer_args); 
-    
-    // Initialize writer resources
-    writer_resources_t* resources = init_writer_resources(); 
-    if (!resources) {
-        
-        // Failed to initialize writer resources
-        fprintf(stderr, "Failed to process results: failed to initialize writer resources\n");
-        return NULL;
-    }
         
     // Start the writer loop
     while ((resources->next_result = claim_result(results_queue))) {
@@ -95,7 +49,10 @@ void* process_results(void* args) {
                 
                 // Failed to handle boundary
                 fprintf(stderr, "Failed to write result to output: error handling boundary\n");
-                free_writer_resources(resources); 
+                if (resources->current_result) free_result(resources->current_result);
+                resources->current_result = NULL; 
+                if (resources->next_result) free_result(resources->next_result);
+                resources->next_result = NULL; 
                 return NULL; 
             } 
                                                 
@@ -104,7 +61,10 @@ void* process_results(void* args) {
                 
                 // Failed to write result to output
                 fprintf(stderr, "Failed to write result to output: error writing result to output\n");
-                free_writer_resources(resources); 
+                if (resources->current_result) free_result(resources->current_result);
+                resources->current_result = NULL; 
+                if (resources->next_result) free_result(resources->next_result);
+                resources->next_result = NULL; 
                 return NULL; 
             }       
                   
@@ -126,7 +86,10 @@ void* process_results(void* args) {
             
             // Failed to write result to output
             fprintf(stderr, "Error writing result to output\n");
-            free_writer_resources(resources); 
+            if (resources->current_result) free_result(resources->current_result);
+            resources->current_result = NULL; 
+            if (resources->next_result) free_result(resources->next_result);
+            resources->next_result = NULL; 
             return NULL; 
         }     
         
@@ -136,7 +99,6 @@ void* process_results(void* args) {
     }
     
     // Free writer resources
-    free_writer_resources(resources);
         
     // Successfully completed writing all results to output stream
     return NULL; 
