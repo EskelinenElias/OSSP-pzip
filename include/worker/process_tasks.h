@@ -12,6 +12,7 @@
 #include "../result/free_result.h"
 #include "../task/free_task.h"
 
+#include "worker_thread.h"
 #include "encode_data.h"
 
 // Structure to represent worker resources

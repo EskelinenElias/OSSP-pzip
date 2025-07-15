@@ -1,1 +1,0 @@
-./tester/run-tests.sh: line 27: 54325 Segmentation fault: 11  ./pzip tests/1.in
