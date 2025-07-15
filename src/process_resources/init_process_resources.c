@@ -58,7 +58,7 @@ process_resources_t* init_process_resources(size_t num_cores, size_t num_files) 
     }
     
     // Initialize writer and check for errors
-    if (!(process->writer = init_writer_thread(process->file_manager, process->results_queue))) {
+    if (!(process->writer = init_writer_thread(process->results_queue, process->file_manager))) {
         
         // Failed to initialize writer
         fprintf(stderr, "Failed to initialize process: failed to initialize writer\n");

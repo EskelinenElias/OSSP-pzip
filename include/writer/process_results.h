@@ -12,7 +12,6 @@
 #include "../results_queue/claim_result.h"
 #include "../result/free_result.h"
 
-#include "free_writer_thread_resources.h"
 #include "writer_thread_args.h"
 #include "handle_boundary.h"
 #include "write_to_output.h"

@@ -3,11 +3,10 @@
 // Function to free process variables
 int free_process_resources(process_resources_t* process) {
         
-    // Terminate workers
+    // Free worker group
     if (process->workers) free_worker_group(process->workers, process->tasks_queue);
-    free(process->workers);
     
-    // Terminate writer thread
+    // Free writer thread
     if (process->writer) free_writer_thread(process->writer);
     
     // Free tasks queue
@@ -21,6 +20,8 @@ int free_process_resources(process_resources_t* process) {
             
     // Free process variables
     free(process);
+    
+    // Successfully freed process resources
     return SUCCESS; 
 }
 

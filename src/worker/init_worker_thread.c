@@ -35,7 +35,7 @@ worker_thread_t* init_worker_thread(tasks_queue_t* tasks_queue, results_queue_t*
         return NULL;
     }
     
-    // Successfully initialized all worker threads
+    // Successfully initialized worker thread
     return worker;
 }
 
