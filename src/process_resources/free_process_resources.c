@@ -4,11 +4,11 @@
 int free_process_resources(process_resources_t* process) {
         
     // Terminate workers
-    if (process->workers) free_workers(process->workers, process->num_workers, process->tasks_queue);
+    if (process->workers) free_worker_group(process->workers, process->tasks_queue);
     free(process->workers);
     
     // Terminate writer thread
-    if (process->writer) free_writer_thread(process->writer, process->results_queue);
+    if (process->writer) free_writer_thread(process->writer);
     
     // Free tasks queue
     if (process->tasks_queue) free_tasks_queue(process->tasks_queue);

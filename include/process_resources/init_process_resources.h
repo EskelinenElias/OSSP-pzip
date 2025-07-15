@@ -6,7 +6,7 @@
 #include "../file_manager/init_file_manager.h"
 #include "../tasks_queue/init_tasks_queue.h"
 #include "../results_queue/init_results_queue.h"
-#include "../worker/init_worker.h"
+#include "../worker/init_worker_group.h"
 #include "../writer/init_writer_thread.h"
 
 #include "process_resources.h"

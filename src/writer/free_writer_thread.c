@@ -1,10 +1,10 @@
 #include "../../include/writer/free_writer_thread.h"
 
 // Function to free writer thread
-int free_writer_thread(writer_thread_t* writer, results_queue_t* results_queue) {
+int free_writer_thread(writer_thread_t* writer) {
     
     // Input validation 
-    if (!writer || !writer->thread || !results_queue) {
+    if (!writer || !writer->thread || !writer->results_queue) {
         
         // Invalid input
         fprintf(stderr, "Failed to free writer thread; invalid input"); 
@@ -12,7 +12,7 @@ int free_writer_thread(writer_thread_t* writer, results_queue_t* results_queue) 
     }
         
     // Reserve an index from the results queue
-    size_t reserved_index = reserve_spot(results_queue); 
+    size_t reserved_index = reserve_spot(writer->results_queue); 
     if (reserved_index == INVALID_INDEX) {
             
         // Failed to reserve index
@@ -21,7 +21,7 @@ int free_writer_thread(writer_thread_t* writer, results_queue_t* results_queue) 
     }
         
     // Yield a NULL result to signal termination
-    if (yield_result(results_queue, NULL, reserved_index) != SUCCESS) {
+    if (yield_result(writer->results_queue, NULL, reserved_index) != SUCCESS) {
         
         // Failed to yield NULL result to signal termination
         fprintf(stderr, "Failed to free writer thread; failed to send termination signal\n");
@@ -36,8 +36,9 @@ int free_writer_thread(writer_thread_t* writer, results_queue_t* results_queue) 
         return ERROR; 
     }
     
-    // Free memory allocated for writer resources and writer
-    if (writer->resources) free_writer_thread_resources(writer->resources); 
+    // Free memory allocated for writer thread resources and writer thread
+    if (writer->current_result) free_result(writer->current_result); 
+    if (writer->next_result) free_result(writer->next_result); 
     free(writer);
     
     // Successfully terminated writer

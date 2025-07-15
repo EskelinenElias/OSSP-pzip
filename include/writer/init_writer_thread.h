@@ -14,6 +14,6 @@
 #include "init_writer_thread_resources.h"
 
 // Function to initialize the writer thread
-writer_thread_t* init_writer_thread(file_manager_t* file_manager, results_queue_t* results_queue); 
+writer_thread_t* init_writer(file_manager_t* file_manager, results_queue_t* results_queue); 
 
 #endif // INIT_WRITER_H

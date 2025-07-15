@@ -6,7 +6,7 @@
 #include "../file_manager/free_file_manager.h"
 #include "../tasks_queue/free_tasks_queue.h"
 #include "../results_queue/free_results_queue.h"
-#include "../worker/free_workers.h"
+#include "../worker/free_worker_group.h"
 #include "../writer/free_writer_thread.h"
 
 #include "process_resources.h"

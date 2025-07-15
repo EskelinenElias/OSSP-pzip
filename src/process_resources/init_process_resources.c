@@ -12,24 +12,13 @@ process_resources_t* init_process_resources(size_t num_cores, size_t num_files) 
     }
     
     // Allocate memory for process variables and check for errors
-    process_resources_t* process = (process_resources_t*)malloc(sizeof(process_resources_t));
+    process_resources_t* process = calloc(1, sizeof(process_resources_t));
     if (!process) {
         
         // Failed to allocate memory for process
         fprintf(stderr, "Failed to initialize process, failed to allocate memory\n");
         return NULL;
     }
-    
-    // Initialize process fields
-    process->file_manager = NULL; 
-    process->tasks_queue = NULL;
-    process->results_queue = NULL; 
-    process->workers = NULL; 
-    process->num_workers = fmax(fmin(get_num_cores(), MAX_THREADS - 2), 1); 
-    process->writer = NULL;
-    
-    /* NOTE: The number of workers needs to be at least 1, and at max MAX_THREADS - 2 
-    (because the main thread and writer thread need to also be accounted for*/
     
     // Initialize file manager and check for errors
     if (!(process->file_manager = init_file_manager(num_files))) {
@@ -58,26 +47,14 @@ process_resources_t* init_process_resources(size_t num_cores, size_t num_files) 
         return NULL;
     }
     
-    // Allocate memory for workers and check for errors
-    if (!(process->workers = calloc(process->num_workers, sizeof(pthread_t*)))) {
+    // Initialize workers
+    size_t num_workers = fmax(fmin(get_num_cores(), MAX_THREADS - 2), 1);
+    if (!(process->workers = init_worker_group(num_workers, process->tasks_queue, process->results_queue))) {
         
-        // Failed to allocate memory for workers
-        fprintf(stderr, "Failed to initialize process: failed to allocate memory for workers\n");
+        // Failed to initialize workers
+        fprintf(stderr, "Failed to initialize process: failed to initialize workers\n");
         free_process_resources(process); 
         return NULL;
-    }
-    
-    // Initialize workers and check for errors
-    for (size_t i = 0; i < process->num_workers; i++) {
-        
-        // Initialize a worker and check for errors
-        if (!(process->workers[i] = init_worker(process->tasks_queue, process->results_queue))) {
-            
-            // Failed to initialize worker
-            fprintf(stderr, "Failed to initialize process: failed to initialize worker %zu\n", i);
-            free_process_resources(process); 
-            return NULL;
-        }
     }
     
     // Initialize writer and check for errors
