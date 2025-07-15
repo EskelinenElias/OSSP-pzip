@@ -8,20 +8,23 @@ void* process_results(void* args) {
         
         // Invalid input
         fprintf(stderr, "Failed to process results: invalid input\n");
+        free(args); 
         return NULL;
     }
     
     // Parse arguments
-    writer_args_t* writer_args = (writer_args_t*)args;
-    if (!writer_args->results_queue || !writer_args->file_manager || !writer_args->resources) {
+    writer_thread_args_t* writer_args = (writer_thread_args_t*)args;
+    if (!writer_args->results_queue || !writer_args->file_manager || !writer_args->writer || !writer_args->writer->resources) {
         
         // Failed to parse argument
         fprintf(stderr, "Failed to process results: missing required arguments\n");
+        free(writer_args); 
         return NULL;
     }
     results_queue_t* results_queue = writer_args->results_queue;
     file_manager_t* file_manager = writer_args->file_manager;
-    writer_thread_resources_t* resources = writer_args->resources;
+    writer_thread_t* writer = writer_args->writer; 
+    writer_thread_resources_t* resources = writer->resources;
     free(writer_args); 
         
     // Start the writer loop
@@ -49,10 +52,8 @@ void* process_results(void* args) {
                 
                 // Failed to handle boundary
                 fprintf(stderr, "Failed to write result to output: error handling boundary\n");
-                if (resources->current_result) free_result(resources->current_result);
-                resources->current_result = NULL; 
-                if (resources->next_result) free_result(resources->next_result);
-                resources->next_result = NULL; 
+                free_writer_thread_resources(resources); 
+                writer->resources = NULL; 
                 return NULL; 
             } 
                                                 
@@ -61,10 +62,8 @@ void* process_results(void* args) {
                 
                 // Failed to write result to output
                 fprintf(stderr, "Failed to write result to output: error writing result to output\n");
-                if (resources->current_result) free_result(resources->current_result);
-                resources->current_result = NULL; 
-                if (resources->next_result) free_result(resources->next_result);
-                resources->next_result = NULL; 
+                free_writer_thread_resources(resources); 
+                writer->resources = NULL; 
                 return NULL; 
             }       
                   
@@ -86,10 +85,8 @@ void* process_results(void* args) {
             
             // Failed to write result to output
             fprintf(stderr, "Error writing result to output\n");
-            if (resources->current_result) free_result(resources->current_result);
-            resources->current_result = NULL; 
-            if (resources->next_result) free_result(resources->next_result);
-            resources->next_result = NULL; 
+            free_writer_thread_resources(resources); 
+            writer->resources = NULL;  
             return NULL; 
         }     
         

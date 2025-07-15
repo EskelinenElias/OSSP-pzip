@@ -10,6 +10,7 @@
 #include "../../include/writer/process_results.h"
 
 #include "writer_thread.h"
+#include "writer_thread_args.h"
 #include "init_writer_thread_resources.h"
 
 // Function to initialize the writer thread

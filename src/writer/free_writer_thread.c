@@ -4,7 +4,7 @@
 int free_writer_thread(writer_thread_t* writer, results_queue_t* results_queue) {
     
     // Input validation 
-    if (!writer || !writer->thread || !writer->resources || !results_queue) {
+    if (!writer || !writer->thread || !results_queue) {
         
         // Invalid input
         fprintf(stderr, "Failed to free writer thread; invalid input"); 
@@ -37,7 +37,7 @@ int free_writer_thread(writer_thread_t* writer, results_queue_t* results_queue) 
     }
     
     // Free memory allocated for writer resources and writer
-    free_writer_thread_resources(writer->resources); 
+    if (writer->resources) free_writer_thread_resources(writer->resources); 
     free(writer);
     
     // Successfully terminated writer

@@ -12,16 +12,10 @@
 #include "../results_queue/claim_result.h"
 #include "../result/free_result.h"
 
-#include "writer_thread_resources.h"
+#include "free_writer_thread_resources.h"
+#include "writer_thread_args.h"
 #include "handle_boundary.h"
 #include "write_to_output.h"
-
-// Structure to represent writer arguments
-typedef struct {
-    file_manager_t* file_manager;
-    results_queue_t* results_queue;
-    writer_thread_resources_t* resources; 
-} writer_args_t;
 
 // Function to process results (in a writer thread)
 void* process_results(void* args); 
