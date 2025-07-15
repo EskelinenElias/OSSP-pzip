@@ -54,8 +54,22 @@ The result data structure represents a chunk of encoded data. It contains a char
 
 The results queue manages results (encoded data) and makes sure they remain in the correct order. Worker threads yield results to the results queue, and the writer thread claims these results in order. In order to yield a result to the results queue, an index for the result must be reserved first; this is done when initializing the corresponding task. The result is then yielded with the reserved index, and the result is put in it's reserved spot in the queue. This is done to ensure that the writer thread receives the results in the correct order. 
 
-## The writer thread
+## Writer thread
 
-The writer thread claims encoding results from the results queue. The results queue ensures that the results are in the correct order. The writer thread handles boundaries between subsequent results and then writes the results to the output stream. The writer thread will terminate upon error or when it claims a NULL result. When encountering an EOF result (encoding data with the size 0), the writer thread tells the file manager to unmap the next file. 
+The writer thread has multiple jobs: it claims encoding results from the results queue; it handles boundaries between subsequent results; it writes results to the output stream; it unmaps files from the file manager, when an EOF result is encountered. It can be initialized by calling the function `init_writer`, and terminated by calling the function `terminate_writer`. The thread terminates when it claims a `NULL` result.
 
-A boundary condition can arise where subsequent chunks divide a substring of subsequent characters (for example, the first chunk end in "bbaa", and the second chunk starts with "aaab", resulting to encodings "2b2a" and "3a1b"). If this condition is met, it is handled before writing the encoded data to the output stream by substracting the last character count from the first chunk and adding it to the second chunk (first chunk becomes "2b" and the second chunk becomes "5a1b"). 
+The function `process_results` is the main loop of the thread. It uses function `claim_result` (see section Results queue) to claim a result, function `handle_boundary` to handle the boundary condition between subsequent results, function `write_to_output` to write a result to the output stream and function `unmap_next_file` (see section File manager) to unmap a file that has been processed. 
+
+A boundary condition between consecutive results arises when consecutive chunks divide a substring of subsequent characters (for example, the first chunk ends in "bbaa", and the second chunk starts with "aaab", resulting to encodings "2b2a" and "3a1b"). If this condition is met, it is handled before writing the encoded data to the output stream by subtracting the last character count from the first chunk and adding it to the second chunk (first chunk becomes "2b" and the second chunk becomes "5a1b"). 
+
+## File manager
+
+The file manager manages the input files. It maps the input files to memory, keeps track of mapped files, and unmaps files when they are no longer needed. It also provides a mechanism to unmap the next file when an EOF result is encountered. The most important job of the file manager is to make sure that no attempt is made to map a file to memory more than once, as this would lead to undefined behavior. 
+
+The file manager is implemented as a `file_manager_t` structure. It can be initialized by calling the `init_file_manager` function, and freed using the `free_file_manager` function. The structure stores an array of mapped files and a mutex to ensure thread safety. Mapped files are stored in the order they are added, in a queue; this way, they can also be unmapped in the same order.
+
+Mapped files are stored as `mapped_file_t` structures. These can be initialized (mapped) by calling the `init_mapped_file` function, and freed using the `free_mapped_file` function. The structure stores the file descriptor, the file size, and a pointer to the mapped memory and file stats to uniquely identify the file (the inode number and device ID).
+
+The function `map_next_file` takes a `file_manager_t` pointer and a filepath. It checks that the file exists, is accessible and is not already mapped; if the file is already mapped, the function returns a pointer to the already created `mapped_file_t` structure. The file is also moved to the end of the queue to delay unmapping, and the original index is set to `NULL` (this indicates to the function `unmap_next_file` that no file needs to be unmapped). If the file is not mapped, it is mapped and added to the end of the queue.
+
+The function `unmap_next_file` takes a `file_manager_t` pointer and returns an integer (return code). The function checks if the next spot in the mapped file queue (pointer by the `head` index) contains a mapped file. If it does, the file is unmapped and removed from the queue. If the queue is empty, the function simply returns. 

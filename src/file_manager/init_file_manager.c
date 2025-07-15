@@ -12,7 +12,7 @@ file_manager_t* init_file_manager(size_t capacity) {
     }
     
     // Allocate memory for file manager
-    file_manager_t* file_manager = (file_manager_t*)malloc(sizeof(file_manager_t));
+    file_manager_t* file_manager = malloc(sizeof(file_manager_t));
     if (!file_manager) {
         
         // Failed to allocate memory for file manager
@@ -23,11 +23,11 @@ file_manager_t* init_file_manager(size_t capacity) {
     // Initialize file manager fields
     file_manager->capacity = capacity;
     file_manager->size = 0;
-    file_manager->front = 0; 
-    file_manager->rear = 0; 
+    file_manager->head = 0; 
+    file_manager->tail = 0; 
 
     // Allocate memory for mapped file queue
-    if (!(file_manager->mapped_file_queue = (mapped_file_t**)malloc(capacity * sizeof(mapped_file_t*)))) {
+    if (!(file_manager->queue = calloc(capacity, sizeof(mapped_file_t*)))) {
         
         // Failed to allocate memory for mapped file queue
         fprintf(stderr, "Failed to initialize file manager: failed to allocate memory for mapped file queue\n");
@@ -35,20 +35,23 @@ file_manager_t* init_file_manager(size_t capacity) {
         return NULL;
     }
     
-    // Allocate memory for and initialize file manager mutex lock
+    // Allocate memory for mutex lock
     if (!(file_manager->lock = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t)))) {
         
         // Failed to allocate memory for file manager mutex lock
-        fprintf(stderr, "Failed to initialize file manager: failed to allocate memory for file manager mutex lock\n");
-        free(file_manager->mapped_file_queue);
+        fprintf(stderr, "Failed to initialize file manager: failed to allocate memory for mutex lock\n");
+        free(file_manager->queue);
         free(file_manager);
         return NULL;
         
-    } else if (pthread_mutex_init(file_manager->lock, NULL) != SUCCESS) {
+    }
+    
+    // Initialize mutex lock
+    if (pthread_mutex_init(file_manager->lock, NULL) != SUCCESS) {
         
         // Failed to initialize file manager mutex lock
-        fprintf(stderr, "Failed to initialize file manager: failed to initialize file manager mutex lock\n");
-        free(file_manager->mapped_file_queue);
+        fprintf(stderr, "Failed to initialize file manager: failed to initialize mutex lock\n");
+        free(file_manager->queue);
         free(file_manager->lock);
         free(file_manager);
         return NULL;

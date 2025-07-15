@@ -3,16 +3,16 @@
 // Function to initialize writer resources
 writer_resources_t* init_writer_resources() {
     
-    // Allocate memory for writer arguments
+    // Allocate memory for writer resources
     writer_resources_t* resources = calloc(1, sizeof(writer_resources_t));
     if (!resources) {
         
-        // Failed to allocate memory for writer arguments
-        fprintf(stderr, "Failed to initialize writer resources: failed to allocate memory for writer arguments\n");
+        // Failed to allocate memory for writer resources
+        fprintf(stderr, "Failed to initialize writer resources: failed to allocate memory for writer resources\n");
         return NULL;
     }
     
-    // Successfully allocated memory for writer arguments
+    // Successfully allocated memory for writer resources
     return resources;
 }
 

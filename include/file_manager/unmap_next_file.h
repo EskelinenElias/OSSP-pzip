@@ -10,7 +10,7 @@
 #include "../constants.h"
 
 #include "file_manager.h"
-#include "mapped_file.h"
+#include "free_mapped_file.h"
 
 // Function to map a file into memory
 int unmap_next_file(file_manager_t* file_manager); 

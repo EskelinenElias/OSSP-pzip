@@ -11,6 +11,7 @@
 #include <pthread.h>
 
 #include "file_manager.h"
+#include "free_mapped_file.h"
 
 // Function to free file manager
 int free_file_manager(file_manager_t* file_manager); 

@@ -7,11 +7,12 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "../../include/constants.h"
-#include "../../include/file_manager/file_manager.h"
-#include "../../include/file_manager/mapped_file.h"
+#include "../constants.h"
 
-// Function to map a file into memory
+#include "file_manager.h"
+#include "init_mapped_file.h"
+
+// Function to add a mapped file to the file manager or retrieve already mapped file
 mapped_file_t* map_next_file(file_manager_t* file_manager, const char *filepath); 
 
 #endif // MAP_NEXT_FILE_H

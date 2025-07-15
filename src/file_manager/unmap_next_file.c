@@ -4,7 +4,7 @@
 int unmap_next_file(file_manager_t* file_manager) {
     
     // Input validation
-    if (!file_manager || !file_manager->mapped_file_queue) {
+    if (!file_manager || !file_manager->queue) {
         
         // Invalid input
         fprintf(stderr, "Failed to unmap next file: invalid input\n");
@@ -15,43 +15,29 @@ int unmap_next_file(file_manager_t* file_manager) {
     if (pthread_mutex_lock(file_manager->lock) != SUCCESS) {
         
         // Failed to acquire lock
-        fprintf(stderr, "Failed to map file: failed to acquire lock\n"); 
+        fprintf(stderr, "Failed to unmap next file: failed to acquire lock\n"); 
         return ERROR;
     }
     
     // Unmap the next file in the queue
-    mapped_file_t* mapped_file = file_manager->mapped_file_queue[file_manager->front]; 
+    mapped_file_t* mapped_file = file_manager->queue[file_manager->head]; 
     if (mapped_file) {
         
-        // Unmap the file from memory
-        if (mapped_file->data && munmap(mapped_file->data, mapped_file->size) != SUCCESS) {
+        // Free mapped file
+        if (free_mapped_file(mapped_file) != SUCCESS) {
             
-            // Failed to unmap file
-            fprintf(stderr, "Failed to unmap next file: failed to unmap file data from memory\n");
-            close(mapped_file->file);
-            free(mapped_file); 
-            pthread_mutex_unlock(file_manager->lock); 
-            return ERROR; 
+            // Failed to free mapped file
+            fprintf(stderr, "Failed to unmap next file: failed to free mapped file\n");
+            pthread_mutex_unlock(file_manager->lock);
+            return ERROR;
         }
         
-        // Close the file
-        if (mapped_file->file != -1 && close(mapped_file->file) != SUCCESS) {
-            
-            // Failed to close file
-            fprintf(stderr, "Failed to unmap next file: failed to close file\n");
-            free(mapped_file); 
-            pthread_mutex_unlock(file_manager->lock); 
-            return ERROR; 
-        }
-        
-        // Free the mapped file structure
-        free(mapped_file);
-        mapped_file = NULL; 
+        // Reset the spot in the queue 
+        file_manager->queue[file_manager->head] = NULL;
     }
     
-    // Update the front index of the queue
-    file_manager->mapped_file_queue[file_manager->front] = NULL;
-    file_manager->front = (file_manager->front + 1) % file_manager->capacity;
+    // Update queue head index and size
+    file_manager->head = (file_manager->head + 1) % file_manager->capacity;
     file_manager->size--; 
     
     // Release lock
