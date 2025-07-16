@@ -6,10 +6,10 @@
 #include "../constants.h"
 
 #include "../task_queue/task_queue.h"
-#include "../task_queue/free_task.h"
 #include "../task_queue/claim_task.h"
 #include "../result_queue/result_queue.h"
 #include "../result_queue/yield_result.h"
+#include "../encoding_task/free_encoding_task.h"
 #include "../encoding_result/free_encoding_result.h"
 
 #include "worker_thread.h"

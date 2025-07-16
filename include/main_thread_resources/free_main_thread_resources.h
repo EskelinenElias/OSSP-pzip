@@ -8,7 +8,6 @@
 #include "../result_queue/free_result_queue.h"
 #include "../worker_thread_pool/free_worker_thread_pool.h"
 #include "../writer_thread/free_writer_thread.h"
-#include "../task_queue/free_task.h"
 
 #include "main_thread_resources.h"
 

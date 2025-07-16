@@ -7,7 +7,7 @@
 
 #include "../constants.h"
 
-#include "../task_queue/free_task.h"
+#include "../encoding_task/free_encoding_task.h"
 #include "../encoding_result/free_encoding_result.h"
 
 #include "worker_thread.h"

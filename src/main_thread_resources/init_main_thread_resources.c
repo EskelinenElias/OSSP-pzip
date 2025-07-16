@@ -66,9 +66,6 @@ main_thread_resources_t* init_main_thread_resources(size_t num_files) {
         return NULL;
     }
     
-    // Initialize task
-    resources->task = NULL; 
-        
     // Successfully initialized main thread resources
     return resources;
 }; 

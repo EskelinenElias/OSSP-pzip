@@ -33,7 +33,7 @@ int yield_task(task_queue_t* task_queue, char* data, size_t size) {
     }
     
     // Initialize a task 
-    task_t* task = init_task(data, size, task_queue->result_queue); 
+    encoding_task_t* task = init_encoding_task(data, size, task_queue->result_queue); 
     if (!task) {
         
         // Failed to initialize task

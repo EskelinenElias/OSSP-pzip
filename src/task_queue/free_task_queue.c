@@ -42,7 +42,7 @@ int free_task_queue(task_queue_t* task_queue) {
         if (!task_queue->tasks[i]) continue; 
         
         // Free the task 
-        if (free_task(task_queue->tasks[i]) != SUCCESS) {
+        if (free_encoding_task(task_queue->tasks[i]) != SUCCESS) {
              
             // Failed to free task 
             fprintf(stderr, "Failed to free task queue: failed to free task\n"); 

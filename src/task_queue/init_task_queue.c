@@ -28,7 +28,7 @@ task_queue_t* init_task_queue(size_t capacity, result_queue_t* result_queue) {
     task_queue->result_queue = result_queue; 
     
     // Allocate memory for tasks
-    if (!(task_queue->tasks = calloc(capacity, sizeof(task_t*)))) {
+    if (!(task_queue->tasks = calloc(capacity, sizeof(encoding_task_t*)))) {
         
         // Failed to allocate memory for tasks
         fprintf(stderr, "Failed to initialize tasks queue: failed to allocate memory for tasks\n");

@@ -12,7 +12,7 @@ int clear_worker_thread_resources(worker_thread_t* worker) {
     }
     
     // Free worker thread task
-    if (worker->encoding_task && free_task(worker->encoding_task) != SUCCESS) {
+    if (worker->encoding_task && free_encoding_task(worker->encoding_task) != SUCCESS) {
         
         // Failed to free worker thread task
         fprintf(stderr, "Failed to clear worker thread resources: failed to free encoding task\n");
@@ -62,7 +62,7 @@ void* worker_thread_main(void* args) {
         size_t reserved_index = worker->encoding_task->reserved_index; 
         
         // Free the memory allocated for the task 
-        if (free_task(worker->encoding_task) != SUCCESS) {
+        if (free_encoding_task(worker->encoding_task) != SUCCESS) {
             
             // Failed to free task
             fprintf(stderr, "Failed to complete task: failed to free encoding task\n");

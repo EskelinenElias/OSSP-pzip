@@ -10,8 +10,6 @@
 #include "main_thread_resources/init_main_thread_resources.h"
 #include "main_thread_resources/free_main_thread_resources.h"
 #include "file_manager/map_next_file.h"
-#include "task_queue/init_task.h"
-#include "task_queue/free_task.h"
 #include "task_queue/yield_task.h"
 
 // Main function 

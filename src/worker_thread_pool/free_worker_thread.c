@@ -20,7 +20,7 @@ int free_worker_thread(worker_thread_t* worker) {
     }
     
     // Free memory allocated for worker thread resources
-    if (worker->encoding_task) free_task(worker->encoding_task); 
+    if (worker->encoding_task) free_encoding_task(worker->encoding_task); 
     if (worker->encoding_result) free_encoding_result(worker->encoding_result);
     
     // Free memory allocated for worker thread

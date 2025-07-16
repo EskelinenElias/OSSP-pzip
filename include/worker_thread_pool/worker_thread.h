@@ -5,8 +5,8 @@
 #include <pthread.h>
 
 #include "../task_queue/task_queue.h"
-#include "../task_queue/task.h"
 #include "../result_queue/result_queue.h"
+#include "../encoding_task/encoding_task.h"
 #include "../encoding_result/encoding_result.h"
 
 // Structure to represent worker thread
@@ -18,7 +18,7 @@ typedef struct {
     result_queue_t* result_queue;
     
     /* Thread resources */
-    task_t* encoding_task; 
+    encoding_task_t* encoding_task; 
     encoding_result_t* encoding_result; 
 } worker_thread_t;
 

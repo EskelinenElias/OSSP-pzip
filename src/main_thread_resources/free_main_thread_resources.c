@@ -17,9 +17,6 @@ int free_main_thread_resources(main_thread_resources_t* resources) {
 
     // Free file manager
     if (resources->file_manager) free_file_manager(resources->file_manager);
-    
-    // Free task
-    if (resources->task) free_task(resources->task);
 
     // Free memory allocated for main thread resources
     free(resources);

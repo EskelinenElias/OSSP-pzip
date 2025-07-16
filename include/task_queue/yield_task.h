@@ -7,10 +7,11 @@
 
 #include "../constants.h"
 
+#include "../encoding_task/init_encoding_task.h"
+
 #include "task_queue.h"
-#include "init_task.h"
 
 // Function to yield task to task queue
-int yield_task(task_queue_t* task_queue, char* task, size_t size); 
+int yield_task(task_queue_t* task_queue, char* data, size_t size); 
 
 #endif // YIELD_TASK_H

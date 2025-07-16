@@ -1,7 +1,7 @@
 #include "../../include/task_queue/claim_task.h"
 
 // Function to claim task from task queue
-task_t* claim_task(task_queue_t* task_queue) {
+encoding_task_t* claim_task(task_queue_t* task_queue) {
             
     // Input validation
     if (!task_queue || !task_queue->lock || !task_queue->tasks || !task_queue->tasks_available) {
@@ -34,7 +34,7 @@ task_t* claim_task(task_queue_t* task_queue) {
     
     // Claim a task from the queue and set the spot in the queue to NULL
     size_t task_index = task_queue->head; 
-    task_t* task = task_queue->tasks[task_index];
+    encoding_task_t* task = task_queue->tasks[task_index];
     task_queue->tasks[task_index] = NULL; 
     
     // Decrement task queue size and update head index
@@ -49,7 +49,7 @@ task_t* claim_task(task_queue_t* task_queue) {
             
             // Failed to signal that there is room in the task queue
             fprintf(stderr, "Failed to claim task: failed to signal that there is room available in the task queue\n"); 
-            free_task(task); 
+            free_encoding_task(task); 
             pthread_mutex_unlock(task_queue->lock); 
             return NULL;
         }
@@ -60,7 +60,7 @@ task_t* claim_task(task_queue_t* task_queue) {
         
         // Failed to release lock
         fprintf(stderr, "Failed to claim task: failed to release lock\n");
-        free_task(task); 
+        free_encoding_task(task); 
         pthread_mutex_unlock(task_queue->lock); 
         return NULL;
     }
