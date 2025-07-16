@@ -5,19 +5,19 @@ void* writer_thread_main(void* args) {
         
     // Input validation
     writer_thread_t* writer = (writer_thread_t*)args;
-    if (!writer || !writer->results_queue || !writer->file_manager) {
+    if (!writer || !writer->result_queue || !writer->file_manager) {
         
         // Failed to parse argument
-        fprintf(stderr, "Failed to process results: invalid input\n");
+        fprintf(stderr, "Failed to process result: invalid input\n");
         return NULL;
     }
     
-    // Setup shorthands for results queue and file manager
-    results_queue_t* results_queue = writer->results_queue;
+    // Setup shorthands for result queue and file manager
+    result_queue_t* result_queue = writer->result_queue;
     file_manager_t* file_manager = writer->file_manager;
         
-    // Start processing results
-    while ((writer->next_result = claim_result(results_queue))) {
+    // Start processing result
+    while ((writer->next_result = claim_result(result_queue))) {
         
         // Check if the next result is empty
         if (writer->next_result->capacity == 0) {
@@ -96,7 +96,7 @@ void* writer_thread_main(void* args) {
     if (writer->next_result) free_result(writer->next_result);
     writer->next_result = NULL;
     
-    // Successfully completed writing all results to output stream
+    // Successfully completed writing all result to output stream
     return NULL; 
 }
 

@@ -1,10 +1,10 @@
 #include "../../include/worker_thread_pool/init_worker_thread.h"
 
 // Function to initialize worker thread
-worker_thread_t* init_worker_thread(tasks_queue_t* tasks_queue, results_queue_t* results_queue) {
+worker_thread_t* init_worker_thread(task_queue_t* task_queue, result_queue_t* result_queue) {
     
     // Input validation
-    if (!tasks_queue || !results_queue) {
+    if (!task_queue || !result_queue) {
         
         // Invalid input
         fprintf(stderr, "Failed to initialize worker thread thread: invalid input\n");
@@ -23,8 +23,8 @@ worker_thread_t* init_worker_thread(tasks_queue_t* tasks_queue, results_queue_t*
     // Set worker thread fields
     worker->result = NULL; 
     worker->task = NULL; 
-    worker->tasks_queue = tasks_queue;
-    worker->results_queue = results_queue;
+    worker->task_queue = task_queue;
+    worker->result_queue = result_queue;
                 
     // Start a new thread and check for errors
     if (pthread_create(&worker->thread, NULL, worker_thread_main, worker) != 0) {

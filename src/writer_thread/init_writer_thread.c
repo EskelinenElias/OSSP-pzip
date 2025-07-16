@@ -1,10 +1,10 @@
 #include "../../include/writer_thread/init_writer_thread.h"
 
 // Function to initialize writer thread
-writer_thread_t* init_writer_thread(results_queue_t* results_queue, file_manager_t* file_manager) {
+writer_thread_t* init_writer_thread(result_queue_t* result_queue, file_manager_t* file_manager) {
     
     // Input validation
-    if (!results_queue || !file_manager) {
+    if (!result_queue || !file_manager) {
         
         // Invalid input
         fprintf(stderr, "Failed to initialize writer thread: invalid input\n");
@@ -22,7 +22,7 @@ writer_thread_t* init_writer_thread(results_queue_t* results_queue, file_manager
     
     // Set writer arguments
     writer->file_manager = file_manager;
-    writer->results_queue = results_queue;
+    writer->result_queue = result_queue;
     writer->current_result = NULL; 
     writer->next_result = NULL; 
     

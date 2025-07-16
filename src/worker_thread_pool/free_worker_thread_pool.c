@@ -4,7 +4,7 @@
 int free_worker_thread_pool(worker_thread_pool_t* worker_pool) {
     
     // Input validation
-    if (!worker_pool || !worker_pool->workers || worker_pool->num_workers <= 0 || !worker_pool->tasks_queue) {
+    if (!worker_pool || !worker_pool->workers || worker_pool->num_workers <= 0 || !worker_pool->task_queue) {
         
         // Invalid input
         fprintf(stderr, "Failed to free worker worker_pool: invalid input\n");
@@ -12,11 +12,11 @@ int free_worker_thread_pool(worker_thread_pool_t* worker_pool) {
     }
     
         
-    // Yield NULL tasks to signal termination
+    // Yield NULL task to signal termination
     for (size_t i = 0; i < worker_pool->num_workers; ++i) {
         
         // Yield NULL task to signal termination
-        if (yield_task(worker_pool->tasks_queue, NULL) != SUCCESS) {
+        if (yield_task(worker_pool->task_queue, NULL) != SUCCESS) {
             
             // Failed to yield task
             fprintf(stderr, "Failed to free worker worker_pool: failed to yield termination task\n");

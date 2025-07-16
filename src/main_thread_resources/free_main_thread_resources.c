@@ -9,11 +9,11 @@ int free_main_thread_resources(main_thread_resources_t* resources) {
     // Free writer thread
     if (resources->writer) free_writer_thread(resources->writer);
 
-    // Free tasks queue
-    if (resources->tasks_queue) free_tasks_queue(resources->tasks_queue);
+    // Free task queue
+    if (resources->task_queue) free_task_queue(resources->task_queue);
 
-    // Free results queue
-    if (resources->results_queue) free_results_queue(resources->results_queue);
+    // Free result queue
+    if (resources->result_queue) free_result_queue(resources->result_queue);
 
     // Free file manager
     if (resources->file_manager) free_file_manager(resources->file_manager);

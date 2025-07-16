@@ -4,10 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../../include/constants.h"
-#include "../../include/result/result.h"
+#include "../constants.h"
 
-// Function to free result data
+#include "result.h"
+
+// Function to free result
 int free_result(result_t* result); 
 
 #endif // FREE_RESULT_H

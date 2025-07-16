@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-#include "../tasks_queue/tasks_queue.h"
+#include "../task_queue/task_queue.h"
 
 #include "worker_thread.h"
 
@@ -11,7 +11,7 @@
 typedef struct {
     worker_thread_t** workers; 
     size_t num_workers; 
-    tasks_queue_t* tasks_queue;
+    task_queue_t* task_queue;
 } worker_thread_pool_t;
 
 #endif // WORKER_THREAD_POOL_H

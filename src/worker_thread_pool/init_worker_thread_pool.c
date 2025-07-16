@@ -1,10 +1,10 @@
 #include "../../include/worker_thread_pool/init_worker_thread_pool.h"
 
 // Function to initialize worker thread pool
-worker_thread_pool_t* init_worker_thread_pool(size_t num_workers, tasks_queue_t* tasks_queue, results_queue_t* results_queue) {
+worker_thread_pool_t* init_worker_thread_pool(size_t num_workers, task_queue_t* task_queue, result_queue_t* result_queue) {
     
     // Input validation
-    if (num_workers <= 0 || !tasks_queue || !results_queue) {
+    if (num_workers <= 0 || !task_queue || !result_queue) {
         
         // Invalid input
         fprintf(stderr, "Failed to initialize worker thread pool: invalid input\n");
@@ -31,14 +31,14 @@ worker_thread_pool_t* init_worker_thread_pool(size_t num_workers, tasks_queue_t*
     }
     
     // Set worker thread pool fields
-    worker_pool->tasks_queue = tasks_queue;
+    worker_pool->task_queue = task_queue;
     worker_pool->num_workers = num_workers;
     
     // Initialize worker threads
     for (size_t i = 0; i < num_workers; i++) {
         
         // Initialize worker thread
-        worker_pool->workers[i] = init_worker_thread(tasks_queue, results_queue);
+        worker_pool->workers[i] = init_worker_thread(task_queue, result_queue);
         if (!worker_pool->workers[i]) {
             
             // Failed to initialize worker thread

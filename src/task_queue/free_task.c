@@ -1,4 +1,4 @@
-#include "../../include/task/free_task.h"
+#include "../../include/task_queue/free_task.h"
 
 // Function to free task
 int free_task(task_t* task) {

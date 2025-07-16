@@ -1,10 +1,10 @@
-#include "../../include/results_queue/reserve_spot.h"
+#include "../../include/result_queue/reserve_spot.h"
 
-// Function to reserve a spot in the results queue
-size_t reserve_spot(results_queue_t* results_queue) {
+// Function to reserve a spot in the result queue
+size_t reserve_spot(result_queue_t* result_queue) {
     
     // Input validation
-    if (!results_queue) {
+    if (!result_queue) {
         
         // Invalid input
         fprintf(stderr, "Failed to reserve spot: invalid input\n");
@@ -12,7 +12,7 @@ size_t reserve_spot(results_queue_t* results_queue) {
     }
     
     // Acquire lock 
-    if (pthread_mutex_lock(results_queue->lock) != SUCCESS) {
+    if (pthread_mutex_lock(result_queue->lock) != SUCCESS) {
         
         // Failed to acquire lock
         fprintf(stderr, "Failed to reserve spot: failed to acquire lock\n");
@@ -20,51 +20,51 @@ size_t reserve_spot(results_queue_t* results_queue) {
     }
     
     // Check if there is room in the queue
-    while (results_queue->size == results_queue->capacity) {
+    while (result_queue->size == result_queue->capacity) {
         
         // Wait until there is room in the queue
-        if (pthread_cond_wait(results_queue->room_available, results_queue->lock) != SUCCESS) {
+        if (pthread_cond_wait(result_queue->room_available, result_queue->lock) != SUCCESS) {
             
             // Failed to wait until there is room in the queue
             fprintf(stderr, "Failed to reserve spot: failed to wait until there is room in the queue\n");
-            pthread_mutex_unlock(results_queue->lock); 
+            pthread_mutex_unlock(result_queue->lock); 
             return INVALID_INDEX;
         }
     }
     
     // Reserve the index at the rear of the queue
-    size_t reserved_index = results_queue->rear; 
+    size_t reserved_index = result_queue->rear; 
     
     // Check that the reserved spot is actually empty
-    if (results_queue->results[reserved_index] != NULL || results_queue->status_flags[reserved_index] != EMPTY) {
+    if (result_queue->results[reserved_index] != NULL || result_queue->status_flags[reserved_index] != EMPTY) {
         
         // The reserved index is not empty
         fprintf(stderr, "Failed to reserve spot: something went wrong\n"); 
-        free_result(results_queue->results[reserved_index]); 
-        results_queue->results[reserved_index] = NULL; 
+        free_result(result_queue->results[reserved_index]); 
+        result_queue->results[reserved_index] = NULL; 
         return INVALID_INDEX; 
     }
     
     // Initialize the result and it's status flag
-    results_queue->results[reserved_index] = NULL; 
-    results_queue->status_flags[reserved_index] = RESERVED; 
+    result_queue->results[reserved_index] = NULL; 
+    result_queue->status_flags[reserved_index] = RESERVED; 
     
     // Increment queue size and update rear index
-    results_queue->size++;
-    results_queue->rear = (results_queue->rear + 1) % results_queue->capacity;
+    result_queue->size++;
+    result_queue->rear = (result_queue->rear + 1) % result_queue->capacity;
         
     // Release the lock
-    if (pthread_mutex_unlock(results_queue->lock) != SUCCESS) {
+    if (pthread_mutex_unlock(result_queue->lock) != SUCCESS) {
         
         // Failed to release lock
         fprintf(stderr, "Failed to reserve spot: failed to release lock\n");
-        results_queue->size--; 
-        results_queue->rear = reserved_index;
-        pthread_mutex_unlock(results_queue->lock);
+        result_queue->size--; 
+        result_queue->rear = reserved_index;
+        pthread_mutex_unlock(result_queue->lock);
         return INVALID_INDEX;
     }
     
-    // Successfully reserved a spot in the results queue
+    // Successfully reserved a spot in the result queue
     return reserved_index;
 }
 

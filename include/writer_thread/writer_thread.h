@@ -4,9 +4,9 @@
 #include <stdio.h>
 #include <pthread.h>
 
-#include "../results_queue/results_queue.h"
+#include "../result_queue/result_queue.h"
+#include "../result_queue/result.h"
 #include "../file_manager/file_manager.h"
-#include "../result/result.h"
 
 // Structure to represent writer thread resources
 typedef struct {
@@ -15,7 +15,7 @@ typedef struct {
     pthread_t thread;
     
     /* Thread input arguments */
-    results_queue_t* results_queue;
+    result_queue_t* result_queue;
     file_manager_t* file_manager;
     
     /* Thread resources */

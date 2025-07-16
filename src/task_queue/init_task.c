@@ -1,10 +1,10 @@
-#include "../../include/task/init_task.h"
+#include "../../include/task_queue/init_task.h"
 
 // Function to initialize task
-task_t* init_task(char* data, size_t size, results_queue_t* results_queue) {
+task_t* init_task(char* data, size_t size, result_queue_t* result_queue) {
     
     // Input validation
-    if (!results_queue) {
+    if (!result_queue) {
         
         // Invalid input
         fprintf(stderr, "Failed to initialize task: invalid input\n");
@@ -20,12 +20,12 @@ task_t* init_task(char* data, size_t size, results_queue_t* results_queue) {
         return NULL;
     }
     
-    // Reserve a spot for the task in the results queue
-    size_t reserved_index = reserve_spot(results_queue);
+    // Reserve a spot for the task in the result queue
+    size_t reserved_index = reserve_spot(result_queue);
     if (reserved_index < 0) {
         
-        // Failed to reserve spot in results queue
-        fprintf(stderr, "Failed to initialize task: failed to reserve spot in results queue\n");
+        // Failed to reserve spot in result queue
+        fprintf(stderr, "Failed to initialize task: failed to reserve spot in result queue\n");
         free(task);
         return NULL;
     }

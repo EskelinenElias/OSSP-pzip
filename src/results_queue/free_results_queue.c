@@ -1,57 +1,57 @@
-#include "../../include/results_queue/free_results_queue.h"
+#include "../../include/result_queue/free_result_queue.h"
 
-// Function to free the results queue
-int free_results_queue(results_queue_t* results_queue) {
+// Function to free the result queue
+int free_result_queue(result_queue_t* result_queue) {
     
     // Input validation
-    if (!results_queue) {
+    if (!result_queue) {
         
         // Invalid input
-        fprintf(stderr, "Failed to free results queue: invalid input\n");
+        fprintf(stderr, "Failed to free result queue: invalid input\n");
         return ERROR; 
     }
     
     // Check if mutex lock exists
-    if (results_queue->lock) {
+    if (result_queue->lock) {
         
-        // Destroy mutex lock for results_queue
-        pthread_mutex_destroy(results_queue->lock);
-        free(results_queue->lock);
+        // Destroy mutex lock for result_queue
+        pthread_mutex_destroy(result_queue->lock);
+        free(result_queue->lock);
     }
     
     // Check if condition variable for room availability exists
-    if (results_queue->room_available) {
+    if (result_queue->room_available) {
         
         // Destroy condition variable for room availability
-        pthread_cond_destroy(results_queue->room_available);
-        free(results_queue->room_available);
+        pthread_cond_destroy(result_queue->room_available);
+        free(result_queue->room_available);
     }   
     
-    // Check if condition variable for results_queue availability exists
-    if (results_queue->result_available) {
+    // Check if condition variable for result_queue availability exists
+    if (result_queue->result_available) {
         
-        // Destroy condition variable for results_queue availability
-        pthread_cond_destroy(results_queue->result_available);
-        free(results_queue->result_available);
+        // Destroy condition variable for result_queue availability
+        pthread_cond_destroy(result_queue->result_available);
+        free(result_queue->result_available);
     }
     
-    // Free any remaining results
-    for (size_t i = 0; i < results_queue->capacity; i++) {
+    // Free any remaining result
+    for (size_t i = 0; i < result_queue->capacity; i++) {
         
         // If the result exists, free it
-        if (results_queue->results[i]) free_result(results_queue->results[i]);
+        if (result_queue->results[i]) free_result(result_queue->results[i]);
     }
     
-    // Free memory allocated for results
-    if (results_queue->results) free(results_queue->results);
+    // Free memory allocated for result
+    if (result_queue->results) free(result_queue->results);
     
     // Free memory allocated for status flags
-    if (results_queue->status_flags) free(results_queue->status_flags);
+    if (result_queue->status_flags) free(result_queue->status_flags);
     
-    // Free memory allocated for results queue structure
-    free(results_queue); 
+    // Free memory allocated for result queue structure
+    free(result_queue); 
     
-    // Successfully freed results queue
+    // Successfully freed result queue
     return SUCCESS; 
 }
 

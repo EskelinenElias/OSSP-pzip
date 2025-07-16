@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
             size_t size = fmin(TASK_SIZE, current_file->size - t); 
             
             // Initialize task
-            if (!(resources->task = init_task(data, size, resources->results_queue))) {
+            if (!(resources->task = init_task(data, size, resources->result_queue))) {
                 
                 // Failed to initialize task
                 fprintf(stderr, "Error: failed to initialize task\n");
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
             }
             
             // Yield task to tasks queue
-            if (yield_task(resources->tasks_queue, resources->task) != SUCCESS) {
+            if (yield_task(resources->task_queue, resources->task) != SUCCESS) {
                 
                 // Failed to yield task to tasks queue
                 fprintf(stderr, "Error: failed to yield task to tasks queue\n");
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
         }
         
         // Initialize an EOF task 
-        if (!(resources->task = init_task(NULL, 0, resources->results_queue))) {
+        if (!(resources->task = init_task(NULL, 0, resources->result_queue))) {
             
             // Failed to initialize EOF task
             fprintf(stderr, "Error: failed to initialize EOF task\n");
@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
         }
                                             
         // Yield EOF task to tasks queue
-        if (yield_task(resources->tasks_queue, resources->task) != SUCCESS) {
+        if (yield_task(resources->task_queue, resources->task) != SUCCESS) {
             
             // Failed to yield EOF task to tasks queue
             fprintf(stderr, "Error: failed to yield EOF task to tasks queue\n");

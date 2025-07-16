@@ -37,24 +37,24 @@ int clear_worker_thread_resources(worker_thread_t* worker) {
     return SUCCESS; 
 }
 
-// Worker thread main function (worker threads process tasks from tasks queue)
+// Worker thread main function (worker threads process task from task queue)
 void* worker_thread_main(void* args) {
 
     // Input validation
     worker_thread_t* worker = (worker_thread_t*) args;
-    if (!worker || !worker->tasks_queue || !worker->results_queue) {
+    if (!worker || !worker->task_queue || !worker->result_queue) {
         
         // Invalid input
-        fprintf(stderr, "Failed to process tasks: missing worker arguments\n");
+        fprintf(stderr, "Failed to process task: missing worker arguments\n");
         return NULL;
     }
     
     // Setup shorthands
-    tasks_queue_t* tasks_queue = worker->tasks_queue;
-    results_queue_t* results_queue = worker->results_queue; 
+    task_queue_t* task_queue = worker->task_queue;
+    result_queue_t* result_queue = worker->result_queue; 
             
-    // Process tasks until a termination task is acquired
-    while ((worker->task = claim_task(tasks_queue)) != NULL) {
+    // Process task until a termination task is acquired
+    while ((worker->task = claim_task(task_queue)) != NULL) {
             
         // Process the current task 
         if (!(worker->result = encode_data(worker->task))) {
@@ -67,7 +67,7 @@ void* worker_thread_main(void* args) {
                         
         // Yield the result to the task_manager
         size_t reserved_index = worker->task->reserved_index; 
-        if (yield_result(results_queue, worker->result, reserved_index) != SUCCESS) {
+        if (yield_result(result_queue, worker->result, reserved_index) != SUCCESS) {
             
             // Failed to yield result to task_manager
             fprintf(stderr, "Failed to complete task: failed to yield result\n"); 
@@ -90,7 +90,7 @@ void* worker_thread_main(void* args) {
     // Clear worker thread resources
     clear_worker_thread_resources(worker); 
     
-    // Successfully processed tasks
+    // Successfully processed task
     return NULL; 
 }
 

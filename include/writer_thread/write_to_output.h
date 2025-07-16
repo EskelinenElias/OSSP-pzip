@@ -6,7 +6,7 @@
 #include <string.h>
 
 #include "../constants.h"
-#include "../result/result.h"
+#include "../result_queue/result.h"
 
 // Function to write encoded data to standard output as bytes
 int write_encoded_data_to_output(result_t* data);

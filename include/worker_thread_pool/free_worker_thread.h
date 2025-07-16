@@ -7,8 +7,8 @@
 
 #include "../constants.h"
 
-#include "../task/free_task.h"
-#include "../result/free_result.h"
+#include "../task_queue/free_task.h"
+#include "../result_queue/free_result.h"
 
 #include "worker_thread.h"
 

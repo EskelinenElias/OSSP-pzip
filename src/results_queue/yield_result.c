@@ -1,53 +1,53 @@
-#include "../../include/results_queue/yield_result.h"
+#include "../../include/result_queue/yield_result.h"
 
-// Function to yield result to results queue
-int yield_result(results_queue_t* results_queue, result_t* result, size_t reserved_index) {
+// Function to yield result to result queue
+int yield_result(result_queue_t* result_queue, result_t* result, size_t reserved_index) {
         
     // Input validation
-    if (!results_queue || !results_queue->lock || !results_queue->result_available || reserved_index < 0) {
+    if (!result_queue || !result_queue->lock || !result_queue->result_available || reserved_index < 0) {
         
         // Invalid input
-        fprintf(stderr, "Failed to yield result to results queue: invalid input\n");
+        fprintf(stderr, "Failed to yield result to result queue: invalid input\n");
         return ERROR; 
     } 
     
     // Acquire lock
-    if (pthread_mutex_lock(results_queue->lock) != SUCCESS) {
+    if (pthread_mutex_lock(result_queue->lock) != SUCCESS) {
         
         // Failed to acquire lock
-        fprintf(stderr, "Failed to yield result to results queue: failed to acquire lock\n");
+        fprintf(stderr, "Failed to yield result to result queue: failed to acquire lock\n");
         return ERROR;
     }
     
     // Check that the reserved index is actually empty
-    if (results_queue->results[reserved_index] != NULL || results_queue->status_flags[reserved_index] != RESERVED) {
+    if (result_queue->results[reserved_index] != NULL || result_queue->status_flags[reserved_index] != RESERVED) {
         
         // Reserved spot is not empty
-        fprintf(stderr, "Failed to yield result to results queue: something went wrong\n"); 
+        fprintf(stderr, "Failed to yield result to result queue: something went wrong\n"); 
         return ERROR; 
     }
     
     // Add the result to the reserved spot and set it's status as completed
-    results_queue->results[reserved_index] = result; 
-    results_queue->status_flags[reserved_index] = COMPLETED; 
+    result_queue->results[reserved_index] = result; 
+    result_queue->status_flags[reserved_index] = COMPLETED; 
     
     // Signal that the next result is available
-    if (reserved_index == results_queue->front && pthread_cond_signal(results_queue->result_available) != 0) {
+    if (reserved_index == result_queue->front && pthread_cond_signal(result_queue->result_available) != 0) {
         
         // Failed to signal that the next result is available
-        fprintf(stderr, "Failed to yield result to results queue: failed to signal that the next result is available\n");
-        results_queue->results[reserved_index] = NULL; 
-        pthread_mutex_unlock(results_queue->lock);
+        fprintf(stderr, "Failed to yield result to result queue: failed to signal that the next result is available\n");
+        result_queue->results[reserved_index] = NULL; 
+        pthread_mutex_unlock(result_queue->lock);
         return ERROR;
     }
     
     // Release the lock
-    if (pthread_mutex_unlock(results_queue->lock) != SUCCESS) {
+    if (pthread_mutex_unlock(result_queue->lock) != SUCCESS) {
         
         // Failed to release lock
-        fprintf(stderr, "Failed to yield result to results queue: failed to release lock\n");
-        results_queue->results[reserved_index] = NULL; 
-        pthread_mutex_unlock(results_queue->lock);
+        fprintf(stderr, "Failed to yield result to result queue: failed to release lock\n");
+        result_queue->results[reserved_index] = NULL; 
+        pthread_mutex_unlock(result_queue->lock);
         return ERROR;
     }
     

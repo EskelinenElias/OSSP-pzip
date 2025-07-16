@@ -5,7 +5,7 @@
 #include "stdlib.h"
 
 #include "../../include/constants.h"
-#include "../../include/result/result.h"
+#include "../../include/result_queue/result.h"
 
 // Function to handle the boundary on subsequent run lenght objects
 int handle_boundary(result_t* left, result_t* right); 

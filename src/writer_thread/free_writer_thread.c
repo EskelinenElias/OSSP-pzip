@@ -4,15 +4,15 @@
 int free_writer_thread(writer_thread_t* writer) {
     
     // Input validation 
-    if (!writer || !writer->thread || !writer->results_queue) {
+    if (!writer || !writer->thread || !writer->result_queue) {
         
         // Invalid input
         fprintf(stderr, "Failed to free writer thread; invalid input"); 
         return ERROR; 
     }
         
-    // Reserve an index from the results queue
-    size_t reserved_index = reserve_spot(writer->results_queue); 
+    // Reserve an index from the result queue
+    size_t reserved_index = reserve_spot(writer->result_queue); 
     if (reserved_index == INVALID_INDEX) {
             
         // Failed to reserve index
@@ -21,7 +21,7 @@ int free_writer_thread(writer_thread_t* writer) {
     }
         
     // Yield a NULL result to signal termination
-    if (yield_result(writer->results_queue, NULL, reserved_index) != SUCCESS) {
+    if (yield_result(writer->result_queue, NULL, reserved_index) != SUCCESS) {
         
         // Failed to yield NULL result to signal termination
         fprintf(stderr, "Failed to free writer thread; failed to send termination signal\n");

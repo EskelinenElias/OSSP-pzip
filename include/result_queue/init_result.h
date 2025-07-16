@@ -4,10 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../../include/constants.h"
-#include "../../include/result/result.h"
+#include "../constants.h"
 
-// Function to initialize result data
+#include "result.h"
+
+// Function to initialize result
 result_t* init_result(size_t initial_capacity); 
 
 #endif // INIT_RESULT_H

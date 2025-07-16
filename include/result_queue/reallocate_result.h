@@ -4,10 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../../include/constants.h"
-#include "../../include/result/result.h"
+#include "../constants.h"
 
-// Function to reallocate result data size
+#include "result.h"
+
+// Function to reallocate result size
 int reallocate_result(result_t* result, size_t new_capacity); 
 
 #endif // REALLOCATE_RESULT_H

@@ -4,8 +4,8 @@
 #include <pthread.h>
 
 #include "../file_manager/init_file_manager.h"
-#include "../tasks_queue/init_tasks_queue.h"
-#include "../results_queue/init_results_queue.h"
+#include "../task_queue/init_task_queue.h"
+#include "../result_queue/init_result_queue.h"
 #include "../worker_thread_pool/init_worker_thread_pool.h"
 #include "../writer_thread/init_writer_thread.h"
 

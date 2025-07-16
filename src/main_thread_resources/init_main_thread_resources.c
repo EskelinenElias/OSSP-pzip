@@ -29,27 +29,27 @@ main_thread_resources_t* init_main_thread_resources(size_t num_cores, size_t num
         return NULL;
     }
     
-    // Initialize tasks queue 
-    if (!(resources->tasks_queue = init_tasks_queue(QUEUE_CAPACITY))) {
+    // Initialize result queue
+    if (!(resources->result_queue = init_result_queue(QUEUE_CAPACITY))) {
         
-        // Failed to initialize tasks queue
-        fprintf(stderr, "Failed to initialize main thread resources: failed to initialize tasks queue\n");
+        // Failed to initialize result queue
+        fprintf(stderr, "Failed to initialize main thread resources: failed to initialize result queue\n");
         free_main_thread_resources(resources); 
         return NULL;
     }
     
-    // Initialize results queue
-    if (!(resources->results_queue = init_results_queue(QUEUE_CAPACITY))) {
+    // Initialize task queue 
+    if (!(resources->task_queue = init_task_queue(QUEUE_CAPACITY, resources->result_queue))) {
         
-        // Failed to initialize results queue
-        fprintf(stderr, "Failed to initialize main thread resources: failed to initialize results queue\n");
+        // Failed to initialize task queue
+        fprintf(stderr, "Failed to initialize main thread resources: failed to initialize task queue\n");
         free_main_thread_resources(resources); 
         return NULL;
     }
     
     // Initialize worker thread pool
     size_t num_workers = fmax(fmin(get_num_cores(), MAX_THREADS - 2), 1);
-    if (!(resources->worker_pool = init_worker_thread_pool(num_workers, resources->tasks_queue, resources->results_queue))) {
+    if (!(resources->worker_pool = init_worker_thread_pool(num_workers, resources->task_queue, resources->result_queue))) {
         
         // Failed to initialize worker thread pool
         fprintf(stderr, "Failed to initialize main thread resources: failed to initialize worker thread pool\n");
@@ -58,7 +58,7 @@ main_thread_resources_t* init_main_thread_resources(size_t num_cores, size_t num
     }
     
     // Initialize writer thread
-    if (!(resources->writer = init_writer_thread(resources->results_queue, resources->file_manager))) {
+    if (!(resources->writer = init_writer_thread(resources->result_queue, resources->file_manager))) {
         
         // Failed to initialize writer thread
         fprintf(stderr, "Failed to initialize main thread resources: failed to initialize writer thread\n");
