@@ -1,4 +1,4 @@
-#include "../../include/result/reallocate_result.h"
+#include "../../include/result_queue/reallocate_result.h"
 
 // Function to increase result data structure capacity
 int reallocate_result(result_t* result, size_t new_capacity) {

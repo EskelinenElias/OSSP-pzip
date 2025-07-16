@@ -1,4 +1,4 @@
-#include "../../include/result/free_result.h"
+#include "../../include/result_queue/free_result.h"
 
 // Function to free the memory allocated for a result data structure
 int free_result(result_t* result) {

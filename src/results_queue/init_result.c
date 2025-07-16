@@ -1,4 +1,4 @@
-#include "../../include/result/init_result.h"
+#include "../../include/result_queue/init_result.h"
 
 // Function to initialize result
 result_t* init_result(size_t initial_capacity) {
