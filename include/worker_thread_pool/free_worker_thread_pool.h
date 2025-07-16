@@ -6,7 +6,7 @@
 #include <pthread.h>
 
 #include "../task_queue/task_queue.h"
-#include "../task_queue/yield_task.h"
+#include "../task_queue/yield_NULL_task.h"
 
 #include "worker_thread_pool.h"
 #include "free_worker_thread.h"

@@ -1,24 +1,14 @@
 #include "../../include/writer_thread/write_to_output.h"
 
-const int TEST = FALSE; 
-
-// Function to write encoded data to standard output as bytes
-int write_encoded_data_to_output(result_t* result) {
+// Function to write encoding result to standard output as bytes
+int write_encoding_result_to_output(encoding_result_t* result) {
     
     // Input validation
     if (!result) {
         
         // Invalid input
-        fprintf(stderr, "Failed to write result to output. Invalid input\n");
+        fprintf(stderr, "Failed to write encoding result to output: invalid input\n");
         return ERROR; 
-    }
-    
-    // Check if the test flag is enabled
-    if (TEST) {
-        
-        // Write test data to output as text
-        write_encoded_text_to_output(result); 
-        return SUCCESS; 
     }
 
     // Iterate through the encoded data
@@ -29,27 +19,29 @@ int write_encoded_data_to_output(result_t* result) {
         fwrite(&result->characters[i], sizeof(char), 1, stdout);    
     }
     
-    // Return the updated buffer pointer
+    // Successfully wrote encoding result to output
     return SUCCESS; 
 }
 
-// Function to write encoded data to standard output as text (for testing purposes)
-int write_encoded_text_to_output(result_t* result) {
+// // Function to write encoded data to standard output as text (for testing purposes)
+// int write_encoded_text_to_output(encoding_result_t* result) {
     
-    // Input validation
-    if (!result) {
+//     // Input validation
+//     if (!result) {
         
-        // Invalid input
-        fprintf(stderr, "Failed to write result to output. Invalid input\n");
-        return ERROR; 
-    }
+//         // Invalid input
+//         fprintf(stderr, "Failed to write result to output. Invalid input\n");
+//         return ERROR; 
+//     }
 
-    // Process the data
-    for (int i = 0; i < result->capacity; i++) {
+//     // Process the data
+//     for (int i = 0; i < result->capacity; i++) {
                 
-        // Write count and character to buffer and advance buffer
-        fprintf(stdout, "%lu%c", result->counts[i], result->characters[i]); 
-    }
+//         // Write count and character to buffer and advance buffer
+//         fprintf(stdout, "%lu%c", result->counts[i], result->characters[i]); 
+//     }
 
-    return SUCCESS; 
-}
+//     return SUCCESS; 
+// }
+
+// EOF 

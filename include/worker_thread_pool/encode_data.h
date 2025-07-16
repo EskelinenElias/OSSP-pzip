@@ -4,13 +4,11 @@
 #include "stdio.h"
 #include "stdlib.h"
 
-#include "../task_queue/task.h"
-#include "../result_queue/result.h"
-#include "../result_queue/init_result.h"
-#include "../result_queue/reallocate_result.h"
-#include "../result_queue/free_result.h"
+#include "../encoding_result/init_encoding_result.h"
+#include "../encoding_result/resize_encoding_result.h"
+#include "../encoding_result/free_encoding_result.h"
 
-// Function to count run lengths for a input string
-result_t* encode_data(task_t* task);
+// Function to encode data
+encoding_result_t* encode_data(char* data, size_t size);
 
 #endif // ENCODE_DATA_H

@@ -4,7 +4,8 @@
 #include <pthread.h>
 
 #include "../result_queue/reserve_spot.h"
-#include "../result_queue/yield_result.h"
+#include "../result_queue/yield_NULL_result.h"
+#include "../encoding_result/free_encoding_result.h"
 
 #include "writer_thread.h"
 

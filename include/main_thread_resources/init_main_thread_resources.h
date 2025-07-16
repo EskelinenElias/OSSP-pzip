@@ -12,7 +12,7 @@
 #include "main_thread_resources.h"
 #include "free_main_thread_resources.h"
 
-// Function to initialize main_thread variables
-main_thread_resources_t* init_main_thread_resources(size_t num_workers, size_t num_files); 
+// Function to initialize main thread resources
+main_thread_resources_t* init_main_thread_resources( size_t num_files); 
 
 #endif // INIT_MAIN_THREAD_RESOURCES_H

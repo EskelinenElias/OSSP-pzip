@@ -1,10 +1,10 @@
-#include "../../include/encoded_data/reallocate_encoded_data.h"
+#include "../../include/encoding_result/resize_encoding_result.h"
 
 // Function to increase encoded data structure capacity
-int reallocate_encoded_data(encoded_data_t* encoded_data, size_t new_capacity) {
+int resize_encoding_result(encoding_result_t* encoding_result, size_t new_capacity) {
     
     // Input validation
-    if (encoded_data == NULL || new_capacity < 0) {
+    if (encoding_result == NULL || new_capacity < 0) {
         
         // Invalid input
         fprintf(stderr, "Failed to reallocate memory for encoded data: invalid input\n"); 
@@ -19,7 +19,7 @@ int reallocate_encoded_data(encoded_data_t* encoded_data, size_t new_capacity) {
     if (new_capacity > 0) {
         
         // Reallocate memory for characters
-        if (!(new_characters = (char*)realloc(encoded_data->characters, new_capacity * sizeof(char)))) {
+        if (!(new_characters = (char*)realloc(encoding_result->characters, new_capacity * sizeof(char)))) {
             
             // Failed to reallocate memory for characters
             fprintf(stderr, "Failed to reallocate memory for encoded data: failed to reallocate memory for characters\n"); 
@@ -27,7 +27,7 @@ int reallocate_encoded_data(encoded_data_t* encoded_data, size_t new_capacity) {
         }
         
         // Reallocate memory for counts
-        if (!(new_counts = (size_t*)realloc(encoded_data->counts, new_capacity * sizeof(size_t)))) {
+        if (!(new_counts = (size_t*)realloc(encoding_result->counts, new_capacity * sizeof(size_t)))) {
             
             // Failed to reallocate memory for counts
             fprintf(stderr, "Failed to reallocate memory for encoded data: failed to reallocate memory for counts\n"); 
@@ -38,14 +38,14 @@ int reallocate_encoded_data(encoded_data_t* encoded_data, size_t new_capacity) {
     } else {
         
         // Free the existing arrays
-        free(encoded_data->characters); 
-        free(encoded_data->counts); 
+        free(encoding_result->characters); 
+        free(encoding_result->counts); 
     }
     
     // Assign reallocated arrays to fields
-    encoded_data->characters = new_characters; 
-    encoded_data->counts = new_counts; 
-    encoded_data->capacity = new_capacity; 
+    encoding_result->characters = new_characters; 
+    encoding_result->counts = new_counts; 
+    encoding_result->capacity = new_capacity; 
     
     // Successfully reallocated encoded data
     return SUCCESS;

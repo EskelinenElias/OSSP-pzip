@@ -7,7 +7,7 @@ int free_worker_thread_pool(worker_thread_pool_t* worker_pool) {
     if (!worker_pool || !worker_pool->workers || worker_pool->num_workers <= 0 || !worker_pool->task_queue) {
         
         // Invalid input
-        fprintf(stderr, "Failed to free worker worker_pool: invalid input\n");
+        fprintf(stderr, "Failed to free worker pool: invalid input\n");
         return ERROR;
     }
     
@@ -16,10 +16,10 @@ int free_worker_thread_pool(worker_thread_pool_t* worker_pool) {
     for (size_t i = 0; i < worker_pool->num_workers; ++i) {
         
         // Yield NULL task to signal termination
-        if (yield_task(worker_pool->task_queue, NULL) != SUCCESS) {
+        if (yield_NULL_task(worker_pool->task_queue) != SUCCESS) {
             
             // Failed to yield task
-            fprintf(stderr, "Failed to free worker worker_pool: failed to yield termination task\n");
+            fprintf(stderr, "Failed to free worker pool: failed to yield termination task\n");
             return ERROR;
         }
     }
@@ -35,7 +35,7 @@ int free_worker_thread_pool(worker_thread_pool_t* worker_pool) {
         if (pthread_join(worker->thread, NULL) != SUCCESS) {
             
             // Failed to join worker thread
-            fprintf(stderr, "Failed to free worker worker_pool: failed to join worker thread\n");
+            fprintf(stderr, "Failed to free worker pool: failed to join worker thread\n");
             return ERROR;
         }
         
@@ -46,12 +46,12 @@ int free_worker_thread_pool(worker_thread_pool_t* worker_pool) {
         if (free_worker_thread(worker) != SUCCESS) {
             
             // Failed to free worker thread
-            fprintf(stderr, "Failed to free worker worker_pool: failed to free worker thread\n");
+            fprintf(stderr, "Failed to free workerpool: failed to free worker thread\n");
             return ERROR;
         }
     }
     
-    // Free memory allocated for worker worker_pool
+    // Free memory allocated for worker pool
     free(worker_pool->workers);
     free(worker_pool);
 

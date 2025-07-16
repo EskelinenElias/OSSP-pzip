@@ -21,8 +21,8 @@ worker_thread_t* init_worker_thread(task_queue_t* task_queue, result_queue_t* re
     }
     
     // Set worker thread fields
-    worker->result = NULL; 
-    worker->task = NULL; 
+    worker->encoding_result = NULL; 
+    worker->encoding_task = NULL; 
     worker->task_queue = task_queue;
     worker->result_queue = result_queue;
                 

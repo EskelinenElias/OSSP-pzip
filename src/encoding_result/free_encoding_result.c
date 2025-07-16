@@ -1,10 +1,10 @@
-#include "../../include/encoded_data/free_encoded_data.h"
+#include "../../include/encoding_result/free_encoding_result.h"
 
 // Function to free encoded data structure
-int free_encoded_data(encoded_data_t* encoded_data) {
+int free_encoding_result(encoding_result_t* encoding_result) {
     
     // Input validation
-    if (!encoded_data) {
+    if (!encoding_result) {
         
         // Invalid input
         fprintf(stderr, "Failed to freeencoded datadata: invalid input\n"); 
@@ -12,13 +12,13 @@ int free_encoded_data(encoded_data_t* encoded_data) {
     }
         
     // Free characters array
-    if (encoded_data->characters) free(encoded_data->characters);
+    if (encoding_result->characters) free(encoding_result->characters);
         
     // Free counts array
-    if (encoded_data->counts) free(encoded_data->counts);
+    if (encoding_result->counts) free(encoding_result->counts);
 
     // Free encoded data structure
-    free(encoded_data); 
+    free(encoding_result); 
     
     // Successfully freed encoded data
     return SUCCESS; 

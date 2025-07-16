@@ -10,7 +10,7 @@
 #include "../task_queue/claim_task.h"
 #include "../result_queue/result_queue.h"
 #include "../result_queue/yield_result.h"
-#include "../result_queue/free_result.h"
+#include "../encoding_result/free_encoding_result.h"
 
 #include "worker_thread.h"
 #include "encode_data.h"

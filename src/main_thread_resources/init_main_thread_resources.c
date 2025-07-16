@@ -1,10 +1,10 @@
 #include "../../include/main_thread_resources/init_main_thread_resources.h"
 
 // Function to initialize main thread resources
-main_thread_resources_t* init_main_thread_resources(size_t num_cores, size_t num_files) {
+main_thread_resources_t* init_main_thread_resources(size_t num_files) {
         
     // Input validation
-    if (num_cores < 1 || num_files < 1) {
+    if (num_files < 1) {
         
         // Invalid input
         fprintf(stderr, "Failed to initialize main thread resources: invalid input\n"); 

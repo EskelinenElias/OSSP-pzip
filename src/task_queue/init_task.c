@@ -4,7 +4,7 @@
 task_t* init_task(char* data, size_t size, result_queue_t* result_queue) {
     
     // Input validation
-    if (!result_queue) {
+    if (!result_queue || size < 0 || (data && size == 0) || (!data && size > 0)) {
         
         // Invalid input
         fprintf(stderr, "Failed to initialize task: invalid input\n");

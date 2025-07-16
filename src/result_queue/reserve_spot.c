@@ -40,8 +40,6 @@ size_t reserve_spot(result_queue_t* result_queue) {
         
         // The reserved index is not empty
         fprintf(stderr, "Failed to reserve spot: something went wrong\n"); 
-        free_result(result_queue->results[reserved_index]); 
-        result_queue->results[reserved_index] = NULL; 
         return INVALID_INDEX; 
     }
     

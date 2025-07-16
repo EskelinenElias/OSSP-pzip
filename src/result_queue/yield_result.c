@@ -1,7 +1,7 @@
 #include "../../include/result_queue/yield_result.h"
 
 // Function to yield result to result queue
-int yield_result(result_queue_t* result_queue, result_t* result, size_t reserved_index) {
+int yield_result(result_queue_t* result_queue, encoding_result_t* result, size_t reserved_index) {
         
     // Input validation
     if (!result_queue || !result_queue->lock || !result_queue->result_available || reserved_index < 0) {

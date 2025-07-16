@@ -8,7 +8,7 @@
 #include "../constants.h"
 
 #include "../task_queue/free_task.h"
-#include "../result_queue/free_result.h"
+#include "../encoding_result/free_encoding_result.h"
 
 #include "worker_thread.h"
 

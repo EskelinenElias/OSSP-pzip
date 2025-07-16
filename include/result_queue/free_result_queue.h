@@ -4,8 +4,9 @@
 #include <stdio.h>
 #include <pthread.h>
 
+#include "../encoding_result/free_encoding_result.h"
+
 #include "result_queue.h"
-#include "free_result.h"
 
 // Function to free result queue
 int free_result_queue(result_queue_t* result_queue);

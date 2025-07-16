@@ -7,8 +7,9 @@
 
 #include "../constants.h"
 
+#include "../encoding_result/free_encoding_result.h"
+
 #include "result_queue.h"
-#include "free_result.h"
 
 // Function to reserve a spot in the result queue
 size_t reserve_spot(result_queue_t* result_queue); 

@@ -17,7 +17,7 @@ void* writer_thread_main(void* args) {
     file_manager_t* file_manager = writer->file_manager;
         
     // Start processing result
-    while ((writer->next_result = claim_result(result_queue))) {
+    while ((writer->next_result = (encoding_result_t*)claim_result(result_queue))) {
         
         // Check if the next result is empty
         if (writer->next_result->capacity == 0) {
@@ -26,7 +26,7 @@ void* writer_thread_main(void* args) {
             unmap_next_file(file_manager);
             
             // Free the empty result
-            free_result(writer->next_result);
+            free_encoding_result(writer->next_result);
             writer->next_result = NULL; 
             
             // Continue to the next iteration
@@ -41,27 +41,27 @@ void* writer_thread_main(void* args) {
                 
                 // Failed to handle boundary
                 fprintf(stderr, "Failed to write result to output: error handling boundary\n");
-                if (writer->current_result) free_result(writer->current_result);
+                if (writer->current_result) free_encoding_result(writer->current_result);
                 writer->current_result = NULL;
-                if (writer->next_result) free_result(writer->next_result);
+                if (writer->next_result) free_encoding_result(writer->next_result);
                 writer->next_result = NULL;
                 return NULL; 
             } 
                                                 
             // Write the current result to output and check for errors
-            if (write_encoded_data_to_output(writer->current_result) != SUCCESS) {
+            if (write_encoding_result_to_output(writer->current_result) != SUCCESS) {
                 
                 // Failed to write result to output
                 fprintf(stderr, "Failed to write result to output: error writing result to output\n");
-                if (writer->current_result) free_result(writer->current_result);
+                if (writer->current_result) free_encoding_result(writer->current_result);
                 writer->current_result = NULL;
-                if (writer->next_result) free_result(writer->next_result);
+                if (writer->next_result) free_encoding_result(writer->next_result);
                 writer->next_result = NULL;
                 return NULL; 
             }       
                   
             // Free the current result        
-            free_result(writer->current_result);
+            free_encoding_result(writer->current_result);
             writer->current_result = NULL;
         }
     
@@ -74,26 +74,26 @@ void* writer_thread_main(void* args) {
     if (writer->current_result && writer->current_result->capacity > 0) {
         
         // Write the last result to output and check for errors
-        if (write_encoded_data_to_output(writer->current_result) != SUCCESS) {
+        if (write_encoding_result_to_output(writer->current_result) != SUCCESS) {
             
             // Failed to write result to output
             fprintf(stderr, "Error writing result to output\n");
-            if (writer->current_result) free_result(writer->current_result);
+            if (writer->current_result) free_encoding_result(writer->current_result);
             writer->current_result = NULL;
-            if (writer->next_result) free_result(writer->next_result);
+            if (writer->next_result) free_encoding_result(writer->next_result);
             writer->next_result = NULL;
             return NULL; 
         }     
         
         // Free the last result
-        free_result(writer->current_result);
+        free_encoding_result(writer->current_result);
         writer->current_result = NULL;
     }
     
     // Free writer resources
-    if (writer->current_result) free_result(writer->current_result);
+    if (writer->current_result) free_encoding_result(writer->current_result);
     writer->current_result = NULL;
-    if (writer->next_result) free_result(writer->next_result);
+    if (writer->next_result) free_encoding_result(writer->next_result);
     writer->next_result = NULL;
     
     // Successfully completed writing all result to output stream

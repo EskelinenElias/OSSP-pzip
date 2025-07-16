@@ -11,17 +11,8 @@ int free_writer_thread(writer_thread_t* writer) {
         return ERROR; 
     }
         
-    // Reserve an index from the result queue
-    size_t reserved_index = reserve_spot(writer->result_queue); 
-    if (reserved_index == INVALID_INDEX) {
-            
-        // Failed to reserve index
-        fprintf(stderr, "Failed to free writer thread: failed to reserve index\n"); 
-        return ERROR; 
-    }
-        
     // Yield a NULL result to signal termination
-    if (yield_result(writer->result_queue, NULL, reserved_index) != SUCCESS) {
+    if (yield_NULL_result(writer->result_queue) != SUCCESS) {
         
         // Failed to yield NULL result to signal termination
         fprintf(stderr, "Failed to free writer thread; failed to send termination signal\n");
@@ -37,8 +28,8 @@ int free_writer_thread(writer_thread_t* writer) {
     }
     
     // Free memory allocated for writer thread resources and writer thread
-    if (writer->current_result) free_result(writer->current_result); 
-    if (writer->next_result) free_result(writer->next_result); 
+    if (writer->current_result) free_encoding_result(writer->current_result); 
+    if (writer->next_result) free_encoding_result(writer->next_result); 
     free(writer);
     
     // Successfully terminated writer

@@ -31,10 +31,10 @@ result_queue_t* init_result_queue(size_t capacity) {
     result_queue->lock = NULL; 
     
     // Allocate memory for result
-    if (!(result_queue->results = calloc(capacity, sizeof(result_t*)))) {
+    if (!(result_queue->results = calloc(capacity, sizeof(encoding_result_t*)))) {
         
         // Failed to allocate memory for result
-        fprintf(stderr, "Failed to initialize result queue: failed to allocate memory for result\n");
+        fprintf(stderr, "Failed to initialize result queue: failed to allocate memory for results\n");
         free_result_queue(result_queue);
         return NULL; 
     }
@@ -43,7 +43,7 @@ result_queue_t* init_result_queue(size_t capacity) {
     if (!(result_queue->status_flags = calloc(capacity, sizeof(int)))) {
         
         // Failed to allocate memory for result
-        fprintf(stderr, "Failed to initialize result queue: failed to allocate memory for status_flags\n");
+        fprintf(stderr, "Failed to initialize result queue: failed to allocate memory for status flags\n");
         free_result_queue(result_queue);
         return NULL; 
     }

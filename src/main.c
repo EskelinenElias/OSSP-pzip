@@ -11,10 +11,9 @@ int main(int argc, char *argv[]) {
         return ERROR;
     }
     
-    // Initialize process variables
-    size_t num_cores = get_num_cores();
+    // Initialize main thread resources
     size_t num_files = argc - 1; 
-    main_thread_resources_t* resources = init_main_thread_resources(num_cores, num_files); 
+    main_thread_resources_t* resources = init_main_thread_resources(num_files); 
     if (!resources) {
         
         // Failed to initialize main thread resources
@@ -42,48 +41,24 @@ int main(int argc, char *argv[]) {
             char* data = current_file->data + t; 
             size_t size = fmin(TASK_SIZE, current_file->size - t); 
             
-            // Initialize task
-            if (!(resources->task = init_task(data, size, resources->result_queue))) {
-                
-                // Failed to initialize task
-                fprintf(stderr, "Error: failed to initialize task\n");
-                free_main_thread_resources(resources);
-                return ERROR;
-            }
-            
-            // Yield task to tasks queue
-            if (yield_task(resources->task_queue, resources->task) != SUCCESS) {
+            // Yield task to task queue
+            if (yield_task(resources->task_queue, data, size) != SUCCESS) {
                 
                 // Failed to yield task to tasks queue
                 fprintf(stderr, "Error: failed to yield task to tasks queue\n");
                 free_main_thread_resources(resources);
                 return ERROR; 
             }
-            
-            // Reset task
-            resources->task = NULL;
-        }
-        
-        // Initialize an EOF task 
-        if (!(resources->task = init_task(NULL, 0, resources->result_queue))) {
-            
-            // Failed to initialize EOF task
-            fprintf(stderr, "Error: failed to initialize EOF task\n");
-            free_main_thread_resources(resources);
-            return ERROR;
         }
                                             
         // Yield EOF task to tasks queue
-        if (yield_task(resources->task_queue, resources->task) != SUCCESS) {
+        if (yield_task(resources->task_queue, NULL, 0) != SUCCESS) {
             
             // Failed to yield EOF task to tasks queue
             fprintf(stderr, "Error: failed to yield EOF task to tasks queue\n");
             free_main_thread_resources(resources);
             return ERROR; 
         }
-        
-        // Reset task
-        resources->task = NULL;
     }
         
     // Cleanup routine

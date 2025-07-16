@@ -37,7 +37,7 @@ clean:
 	
 # Run tests
 test:
-	cp pzip tests/pzip && cd tests && ./tester/run-tests.sh $* && cd ..
+	cp pzip tests/pzip && cd tests && ./tester/run-tests.sh $* && rm pzip &&cd ..
 
 # Debug target to show variables
 debug:

@@ -8,9 +8,9 @@
 #include "../file_manager/file_manager.h"
 #include "../file_manager/unmap_next_file.h"
 #include "../result_queue/result_queue.h"
-#include "../result_queue/result.h"
-#include "../result_queue/free_result.h"
 #include "../result_queue/claim_result.h"
+#include "../encoding_result/encoding_result.h"
+#include "../encoding_result/free_encoding_result.h"
 
 #include "writer_thread.h"
 #include "handle_boundary.h"

@@ -1,10 +1,10 @@
 #include "../../include/task_queue/yield_task.h"
 
 // Function to yield task to task queue
-int yield_task(task_queue_t* task_queue, task_t* task) {
+int yield_task(task_queue_t* task_queue, char* data, size_t size) {
     
     // Input validation
-    if (!task_queue || !task_queue->lock || !task_queue->tasks || !task_queue->room_available || (task && task->reserved_index < 0)) {
+    if (!task_queue || !task_queue->lock || !task_queue->tasks || !task_queue->room_available || size < 0) {
         
         // Invalid input
         fprintf(stderr, "Failed to yield task: invalid input\n");
@@ -22,14 +22,24 @@ int yield_task(task_queue_t* task_queue, task_t* task) {
     // Check if there is room in the queue
     while (task_queue->size == task_queue->capacity) {
         
-        // Wait until there is room in the queue
+        // Wait until room becomes available (as worker threads claim tasks)
         if (pthread_cond_wait(task_queue->room_available, task_queue->lock) != SUCCESS) {
             
-            // Failed to wait for until there is room in the queue 
-            fprintf(stderr, "Failed to yield task: failed to wait until there is room in the queue\n");
+            // Failed to wait for room to become available
+            fprintf(stderr, "Failed to yield task: failed to wait for room to become available\n");
             pthread_mutex_unlock(task_queue->lock); 
             return ERROR;
         }
+    }
+    
+    // Initialize a task 
+    task_t* task = init_task(data, size, task_queue->result_queue); 
+    if (!task) {
+        
+        // Failed to initialize task
+        fprintf(stderr, "Failed to yield task: failed to initialize task\n");
+        pthread_mutex_unlock(task_queue->lock); 
+        return ERROR;
     }
     
     // Add the task to the end of the queue, increment size and update tail index

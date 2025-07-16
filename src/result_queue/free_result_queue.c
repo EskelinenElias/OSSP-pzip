@@ -35,11 +35,11 @@ int free_result_queue(result_queue_t* result_queue) {
         free(result_queue->result_available);
     }
     
-    // Free any remaining result
+    // Free any remaining results
     for (size_t i = 0; i < result_queue->capacity; i++) {
         
         // If the result exists, free it
-        if (result_queue->results[i]) free_result(result_queue->results[i]);
+        if (result_queue->results[i]) free_encoding_result(result_queue->results[i]);
     }
     
     // Free memory allocated for result
