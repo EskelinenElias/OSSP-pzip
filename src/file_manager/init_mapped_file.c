@@ -31,6 +31,7 @@ mapped_file_t* init_mapped_file(int file_descriptor, struct stat* file_stat) {
     }
     
     // Initialize the mapped file structure
+    mapped_file->file = file_descriptor;
     mapped_file->st_ino = file_stat->st_ino;
     mapped_file->st_dev = file_stat->st_dev;
     mapped_file->size = file_stat->st_size;

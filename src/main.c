@@ -14,10 +14,11 @@ int main(int argc, char *argv[]) {
     // Initialize process variables
     size_t num_cores = get_num_cores();
     size_t num_files = argc - 1; 
-    process_resources_t* resources = init_process_resources(num_cores, num_files); 
+    main_thread_resources_t* resources = init_main_thread_resources(num_cores, num_files); 
     if (!resources) {
         
-        // Failed to initialize process variables
+        // Failed to initialize main thread resources
+        fprintf(stderr, "Error: failed to initialize main thread resources\n");
         return ERROR; 
     }
                     
@@ -29,7 +30,8 @@ int main(int argc, char *argv[]) {
         if (!current_file) {
             
             // Failed to map file 
-            free_process_resources(resources); 
+            free_main_thread_resources(resources); 
+            fprintf(stderr, "Error: failed to map file '%s'\n", argv[i + 1]);
             return ERROR; 
         }
                                 
@@ -41,46 +43,54 @@ int main(int argc, char *argv[]) {
             size_t size = fmin(TASK_SIZE, current_file->size - t); 
             
             // Initialize task
-            task_t* task = init_task(data, size, resources->results_queue);
-            if (!task) {
+            if (!(resources->task = init_task(data, size, resources->results_queue))) {
                 
                 // Failed to initialize task
-                free_process_resources(resources);
+                fprintf(stderr, "Error: failed to initialize task\n");
+                free_main_thread_resources(resources);
                 return ERROR;
             }
             
-            // Yield task to task manager
-            if (yield_task(resources->tasks_queue, task) != SUCCESS) {
+            // Yield task to tasks queue
+            if (yield_task(resources->tasks_queue, resources->task) != SUCCESS) {
                 
-                // Failed to yield task to task manager
-                free_task(task); 
-                free_process_resources(resources);
+                // Failed to yield task to tasks queue
+                fprintf(stderr, "Error: failed to yield task to tasks queue\n");
+                free_main_thread_resources(resources);
                 return ERROR; 
             }
+            
+            // Reset task
+            resources->task = NULL;
         }
         
-        // Initialize EOF task
-        task_t* EOF_task = init_task(NULL, 0, resources->results_queue);
-        if (!EOF_task) {
+        // Initialize an EOF task 
+        if (!(resources->task = init_task(NULL, 0, resources->results_queue))) {
             
-            // Failed to initialize task
-            free_process_resources(resources);
+            // Failed to initialize EOF task
+            fprintf(stderr, "Error: failed to initialize EOF task\n");
+            free_main_thread_resources(resources);
             return ERROR;
         }
-                                        
-        // Yield EOF task to task manager (writer thread will tell file manager to unmap and close the next file in queue when it encounters this)
-        if (yield_task(resources->tasks_queue, EOF_task) != SUCCESS) {
+                                            
+        // Yield EOF task to tasks queue
+        if (yield_task(resources->tasks_queue, resources->task) != SUCCESS) {
             
-            // Failed to yield EOF task to task task_manager
-            free_process_resources(resources);
+            // Failed to yield EOF task to tasks queue
+            fprintf(stderr, "Error: failed to yield EOF task to tasks queue\n");
+            free_main_thread_resources(resources);
             return ERROR; 
         }
+        
+        // Reset task
+        resources->task = NULL;
     }
         
     // Cleanup routine
-    if (free_process_resources(resources) != SUCCESS) {
+    if (free_main_thread_resources(resources) != SUCCESS) {
         
         // Failed to clean up process
+        fprintf(stderr, "Error: failed to free resources\n");
         return ERROR; 
     };
     

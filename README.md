@@ -56,7 +56,7 @@ The results queue manages results (encoded data) and makes sure they remain in t
 
 ## Writer thread
 
-The writer thread has multiple jobs: it claims encoding results from the results queue; it handles boundaries between subsequent results; it writes results to the output stream; it unmaps files from the file manager, when an EOF result is encountered. It can be initialized by calling the function `init_writer`, and terminated by calling the function `terminate_writer`. The thread terminates when it claims a `NULL` result.
+The writer thread has multiple jobs: it claims encoding results from the results queue; it handles boundaries between subsequent results; it writes results to the output stream; it unmaps files from the file manager, when an EOF result is encountered. It can be initialized by calling the function `init_writer_thread`, and terminated by calling the function `free_writer_thread`. The thread terminates when it claims a `NULL` result.
 
 The function `process_results` is the main loop of the thread. It uses function `claim_result` (see section Results queue) to claim a result, function `handle_boundary` to handle the boundary condition between subsequent results, function `write_to_output` to write a result to the output stream and function `unmap_next_file` (see section File manager) to unmap a file that has been processed. 
 

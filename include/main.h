@@ -6,14 +6,13 @@
 #include <string.h>
 #include <math.h>
 
-#include "../include/constants.h"
-#include "../include/process_resources/init_process_resources.h"
-#include "../include/process_resources/free_process_resources.h"
-#include "../include/file_manager/map_next_file.h"
-#include "../include/task/task.h"
-#include "../include/task/init_task.h"
-#include "../include/task/free_task.h"
-#include "../include/tasks_queue/yield_task.h"
+#include "constants.h"
+#include "main_thread_resources/init_main_thread_resources.h"
+#include "main_thread_resources/free_main_thread_resources.h"
+#include "file_manager/map_next_file.h"
+#include "task/init_task.h"
+#include "task/free_task.h"
+#include "tasks_queue/yield_task.h"
 
 // Main function 
 int main(int argc, char *argv[]); 

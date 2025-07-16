@@ -3,3 +3,5 @@
 INSTRUCTIONS.md
 generate_data.py
 pzip
+tests/leaks/*
+git-filter-repo.py
